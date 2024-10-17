@@ -1,10 +1,10 @@
 === Access Defender ===
 Contributors: huzaifaalmesbah
-Tags: vpn, proxy, security, access control, ip detection
-Requires at least: 5.0
-Tested up to: 6.3
+Tags: vpn, proxy, access control, ip-detection
+Requires at least: 5.9
+Tested up to: 6.6.2
 Requires PHP: 7.4
-Stable tag: 1.6
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,8 +59,7 @@ This plugin uses a third-party API (ip-api.com) to detect if users are accessing
 
 ### ip-api.com Privacy Policy and Terms
 - ip-api.com collects IP addresses solely for the purpose of identifying VPNs, proxies, and hosting providers. They do not collect any personally identifiable information beyond the IP address.
-- You can view their privacy policy [here](https://ip-api.com/legal#privacy).
-- For terms of use, please refer to [ip-api.com terms](https://ip-api.com/legal#terms).
+- You can view their Terms and Policies [here](https://ip-api.com/docs/legal).
 
 By using the Access Defender plugin, you agree to the terms of use set forth by the ip-api.com API service. Make sure to review their privacy policies before enabling this plugin.
 

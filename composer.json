@@ -1,0 +1,18 @@
+{
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^3.1",
+        "wp-cli/i18n-command": "^2.6",
+        "phpcompatibility/phpcompatibility-wp": "*"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+		"lint:wpcs": "@php ./vendor/squizlabs/php_codesniffer/bin/phpcs",
+		"lint:php": "@php ./vendor/bin/parallel-lint --exclude .git --exclude vendor .",
+		"make-pot": "wp i18n make-pot . languages/smart-password-protect.pot",
+		"lint:autofix": "vendor/bin/phpcbf"
+	}
+}

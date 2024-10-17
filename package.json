@@ -1,0 +1,9 @@
+{
+  "devDependencies": {
+    "dir-archiver": "^2.1.0",
+    "gettext-parser": "^8.0.0"
+  },
+  "scripts": {
+    "bundle": "dir-archiver --src . --dest ../access-defender.zip --exclude .DS_Store .git .wordpress-org  .gitattributes .github .gitignore .distignore README.md composer.json composer.lock node_modules vendor  package-lock.json package.json phpcs.xml.dist"
+  }
+}
