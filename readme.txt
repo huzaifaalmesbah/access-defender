@@ -1,71 +1,71 @@
-=== AccessGuard VPN Blocker ===
+=== Access Defender ===
 Contributors: huzaifaalmesbah
-Tags: security, vpn blocker, proxy blocker, access control
+Tags: vpn, proxy, security, access control, ip detection
 Requires at least: 5.0
-Tested up to: 6.4
-Stable tag: 1.5
-Requires PHP: 7.2
+Tested up to: 6.3
+Requires PHP: 7.4
+Stable tag: 1.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Block access to your WordPress site for users connecting through VPNs or proxies.
+Blocks users using VPN or proxy and shows a warning notice using the free ip-api.com API with enhanced IP detection.
 
 == Description ==
 
-AccessGuard VPN Blocker enhances your WordPress site's security by preventing access from VPN and proxy connections. It uses the free IPapi.co service to detect VPN and proxy usage, providing an additional layer of protection for your website.
+Access Defender is a WordPress plugin designed to improve website security by blocking users who are using VPNs or proxies. This plugin uses the **ip-api.com** API to identify if a visitor is accessing your site through a VPN, proxy, or hosting provider. If detected, the user will be presented with a customizable warning message.
 
-Key Features:
-* Automatically detects and blocks VPN and proxy connections
-* Uses multiple HTTP headers for accurate client IP detection
-* Displays a customizable warning message to blocked users
-* Lightweight and easy to use with no configuration required
+### Features:
+* Detect and block users who access your site using VPNs, proxies, or hosting providers.
+* Customizable warning message and title.
+* Simple settings page to enable or disable blocking.
 
-Please note: This plugin uses the free tier of IPapi.co for VPN and proxy detection. Be sure to review their terms of service and ensure your usage complies with their policies.
+### Why use Access Defender?
+VPNs and proxies can sometimes be used to hide malicious intent. By using Access Defender, you can block users with masked IP addresses, ensuring better control over the security of your website.
+
+### Third-party API Usage
+This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking the visitor's IP address. For more information on ip-api.com’s privacy practices, please see the **Privacy Policy and Terms of Use** below.
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/accessguard-vpn-blocker` directory, or install the plugin through the WordPress plugins screen directly.
-2. Activate the plugin through the 'Plugins' screen in WordPress.
-3. The plugin will start working immediately with default settings.
+1. Upload the `access-defender` folder to the `/wp-content/plugins/` directory.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. Go to **Settings > Access Defender** to configure the plugin.
 
 == Frequently Asked Questions ==
 
-= How does this plugin detect VPNs and proxies? =
+= How does Access Defender work? =
+Access Defender uses the ip-api.com API to identify if a visitor is accessing your site through a VPN or proxy by looking up their IP address. If a VPN or proxy is detected, the visitor will be blocked from accessing your website and shown a customizable warning message.
 
-AccessGuard VPN Blocker uses the IPapi.co service to check if the visitor's IP address is associated with a VPN or proxy service.
+= Is the ip-api.com API free? =
+Yes, ip-api.com provides a free tier, which allows a limited number of API requests per minute. You can check their website for more details on pricing and usage limits.
 
-= Will this plugin slow down my website? =
+= Can I customize the warning message? =
+Yes! You can customize the warning title and message via the plugin's settings page. The message is shown to users blocked by Access Defender.
 
-The plugin makes an API call for each visitor, which may add a small amount of load time. However, for most websites, this should not cause noticeable slowdowns.
+== Screenshots ==
 
-= Can legitimate users be blocked accidentally? =
-
-While we strive for accuracy, there's always a small chance that some legitimate users might be blocked, especially if they're using a hosting service that's flagged as a proxy. If this becomes an issue, you may need to implement a whitelist feature.
-
-= Is this plugin GDPR compliant? =
-
-The plugin itself doesn't store any personal data. However, it does send IP addresses to IPapi.co for checking. Please review IPapi.co's privacy policy to ensure compliance with your privacy requirements.
+1. **Settings Page** – Configure the plugin settings, including enabling VPN blocking and setting custom warning messages.
+2. **Blocked User Screen** – Example of the custom warning message shown to blocked users.
 
 == Changelog ==
 
-= 1.5 =
-* Initial release
+= 1.6 =
+* Initial release with VPN and proxy detection using ip-api.com API.
+* Added customizable warning messages.
+* Improved IP address detection methods.
 
-== Upgrade Notice ==
+== Privacy and Data Collection ==
+This plugin uses a third-party API (ip-api.com) to detect if users are accessing your website through a VPN or proxy. **When a user visits your website, their IP address will be sent to the ip-api.com API** for analysis to determine if it belongs to a VPN or proxy.
 
-= 1.5 =
-Initial release of AccessGuard VPN Blocker.
+### ip-api.com Privacy Policy and Terms
+- ip-api.com collects IP addresses solely for the purpose of identifying VPNs, proxies, and hosting providers. They do not collect any personally identifiable information beyond the IP address.
+- You can view their privacy policy [here](https://ip-api.com/legal#privacy).
+- For terms of use, please refer to [ip-api.com terms](https://ip-api.com/legal#terms).
 
-== API Terms and Policies ==
+By using the Access Defender plugin, you agree to the terms of use set forth by the ip-api.com API service. Make sure to review their privacy policies before enabling this plugin.
 
-This plugin uses the free tier of IPapi.co for VPN and proxy detection. By using this plugin, you agree to comply with IPapi.co's terms of service and policies. Please review their terms at https://ip-api.com/docs/legal.
+== License ==
+This plugin is licensed under the GPLv2 or later. For more information, please review the [GPLv2 license](https://www.gnu.org/licenses/gpl-2.0.html).
 
-Key points to note:
-1. The free tier is limited to 45 requests per minute.
-2. Commercial use requires a paid plan.
-3. Caching of results is recommended to minimize API calls.
-4. IP-API.com collects and stores IP addresses for service improvement and abuse prevention.
-
-It is your responsibility to ensure that your use of this plugin and the IPapi.co service complies with all applicable laws and regulations, including data protection laws like GDPR.
-
-For full details, please visit: https://ip-api.com/docs/legal
+== Terms of Use and Disclaimer ==
+Access Defender is provided as-is, without any warranty. While we strive to provide a high level of security, it is important to note that no security measure is 100% foolproof. The plugin uses third-party services, and their availability or changes to their terms could affect the plugin’s functionality.
