@@ -22,6 +22,10 @@ Access Defender is a WordPress plugin designed to improve website security by bl
 ### Why use Access Defender?
 VPNs and proxies can sometimes be used to hide malicious intent. By using Access Defender, you can block users with masked IP addresses, ensuring better control over the security of your website.
 
+### Credits:
+* **API Provider**: This plugin uses the **ip-api.com** API for VPN and proxy detection. You can learn more about their services and usage at [ip-api.com](https://ip-api.com).
+* Special thanks to the team at **ip-api.com** for providing reliable and accurate IP detection services.
+
 ### Third-party API Usage
 This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking the visitor's IP address. For more information on ip-api.com’s privacy practices, please see the **Privacy Policy and Terms of Use** below.
 
