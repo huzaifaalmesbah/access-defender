@@ -1,6 +1,6 @@
 === Access Defender ===
 Contributors: huzaifaalmesbah
-Tags: vpn, proxy, access control, ip-detection
+Tags: security, access control, ip-detection, proxy
 Requires at least: 5.9
 Tested up to: 6.6.2
 Requires PHP: 7.4
@@ -14,19 +14,19 @@ Blocks users using VPN or proxy and shows a warning notice using the free ip-api
 
 Access Defender is a WordPress plugin designed to improve website security by blocking users who are using VPNs or proxies. This plugin uses the **ip-api.com** API to identify if a visitor is accessing your site through a VPN, proxy, or hosting provider. If detected, the user will be presented with a customizable warning message.
 
-### Features:
+=== Features: ===
 * Detect and block users who access your site using VPNs, proxies, or hosting providers.
 * Customizable warning message and title.
 * Simple settings page to enable or disable blocking.
 
-### Why use Access Defender?
+=== Why use Access Defender? ===
 VPNs and proxies can sometimes be used to hide malicious intent. By using Access Defender, you can block users with masked IP addresses, ensuring better control over the security of your website.
 
-### Credits:
+=== Credits: ===
 * **API Provider**: This plugin uses the **ip-api.com** API for VPN and proxy detection. You can learn more about their services and usage at [ip-api.com](https://ip-api.com).
 * Special thanks to the team at **ip-api.com** for providing reliable and accurate IP detection services.
 
-### Third-party API Usage
+=== Third-party API Usage ===
 This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking the visitor's IP address. For more information on ip-api.com’s privacy practices, please see the **Privacy Policy and Terms of Use** below.
 
 == Installation ==
@@ -51,9 +51,16 @@ Yes! You can customize the warning title and message via the plugin's settings p
 1. **Settings Page** – Configure the plugin settings, including enabling VPN blocking and setting custom warning messages.
 2. **Blocked User Screen** – Example of the custom warning message shown to blocked users.
 
+== Upgrade Notice ==
+
+= 1.0.0 =
+* Initial release with VPN and proxy detection using ip-api.com API.
+* Added customizable warning messages.
+* Improved IP address detection methods.
+
 == Changelog ==
 
-= 1.6 =
+= 1.0.0 =
 * Initial release with VPN and proxy detection using ip-api.com API.
 * Added customizable warning messages.
 * Improved IP address detection methods.
@@ -61,7 +68,7 @@ Yes! You can customize the warning title and message via the plugin's settings p
 == Privacy and Data Collection ==
 This plugin uses a third-party API (ip-api.com) to detect if users are accessing your website through a VPN or proxy. **When a user visits your website, their IP address will be sent to the ip-api.com API** for analysis to determine if it belongs to a VPN or proxy.
 
-### ip-api.com Privacy Policy and Terms
+=== ip-api.com Privacy Policy and Terms ===
 - ip-api.com collects IP addresses solely for the purpose of identifying VPNs, proxies, and hosting providers. They do not collect any personally identifiable information beyond the IP address.
 - You can view their Terms and Policies [here](https://ip-api.com/docs/legal).
 
