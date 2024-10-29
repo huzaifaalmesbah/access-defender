@@ -31,9 +31,25 @@ This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking
 
 == Installation ==
 
-1. Upload the `access-defender` folder to the `/wp-content/plugins/` directory.
-2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. Go to **Settings > Access Defender** to configure the plugin.
+= Plugin Installation Method: =
+1. Go to the WordPress dashboard.
+2. Navigate to **Plugins > Add New**.
+3. Search for "Access Defender".
+4. Click on the **Install** button.
+5. Activate the plugin after installation.
+
+= Installation via Zip File: =
+1. Download the **Access Defender** plugin zip file.
+2. Go to **Plugins > Add New > Upload Plugin**.
+3. Upload `product-spotlight-badge.zip` and install it.
+4. Activate the plugin.
+
+= Plugin Configuration: =
+1. Navigate to **Settings > Access Defender** in your WordPress dashboard.
+2. Configure the settings for Access Defender below:
+    - **Enable VPN Blocking**: Enable VPN and Proxy Blocking.
+    - **Warning Title**: Enter the custom warning title (e.g., "Access Denied").
+    - **Warning Message**: Enter the custom warning message to be shown to blocked users.
 
 == Frequently Asked Questions ==
 
