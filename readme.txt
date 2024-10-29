@@ -41,7 +41,7 @@ This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking
 = Installation via Zip File: =
 1. Download the **Access Defender** plugin zip file.
 2. Go to **Plugins > Add New > Upload Plugin**.
-3. Upload `product-spotlight-badge.zip` and install it.
+3. Upload `access-defender.zip` and install it.
 4. Activate the plugin.
 
 = Plugin Configuration: =
