@@ -1,9 +1,6 @@
 <?php
 /**
- * Plugin Core Class File
- *
- * This file contains the main Plugin class that handles initialization and core functionality
- * of the Access Defender plugin.
+ * Main Plugin Class
  *
  * @package AccessDefender
  * @subpackage Core
@@ -19,41 +16,40 @@ use AccessDefender\Services\VpnDetector;
 /**
  * Plugin Class
  *
- * Handles the initialization and core functionality of the Access Defender plugin.
- * Implements the PluginInterface for standardized plugin structure.
+ * Main plugin class that handles initialization and core functionality.
  */
 class Plugin implements PluginInterface {
 
 	/**
-	 * Bot detector service instance
+	 * Bot detector service instance.
 	 *
 	 * @var BotDetector
 	 */
 	private BotDetector $bot_detector;
 
 	/**
-	 * IP detector service instance
+	 * IP detector service instance.
 	 *
 	 * @var IpDetector
 	 */
 	private IpDetector $ip_detector;
 
 	/**
-	 * VPN detector service instance
+	 * VPN detector service instance.
 	 *
 	 * @var VpnDetector
 	 */
 	private VpnDetector $vpn_detector;
 
 	/**
-	 * Admin page instance
+	 * Admin page instance.
 	 *
 	 * @var AdminPage
 	 */
 	private AdminPage $admin_page;
 
 	/**
-	 * Access checker instance
+	 * Access checker instance.
 	 *
 	 * @var AccessChecker
 	 */
@@ -61,8 +57,6 @@ class Plugin implements PluginInterface {
 
 	/**
 	 * Constructor
-	 *
-	 * Initializes the plugin by setting up service instances and dependencies.
 	 */
 	public function __construct() {
 		$this->ip_detector    = new IpDetector();
@@ -75,17 +69,23 @@ class Plugin implements PluginInterface {
 	/**
 	 * Initialize the plugin
 	 *
-	 * Sets up WordPress hooks and initializes the admin page.
+	 * This method loads and initializes the necessary classes for the plugin.
+	 *
+	 * @return void
 	 */
 	public function init(): void {
 		$this->init_hooks();
 		$this->admin_page->init();
+
+		// Add plugin action and meta links.
+		add_filter( 'plugin_action_links_' . plugin_basename( ACCESS_DEFENDER_FILE ), array( $this, 'add_plugin_settings_link' ) );
+		add_filter( 'plugin_row_meta', array( $this, 'plugin_row_meta' ), 10, 2 );
 	}
 
 	/**
 	 * Initialize WordPress hooks
 	 *
-	 * Sets up the necessary WordPress action hooks for the plugin.
+	 * @return void
 	 */
 	private function init_hooks(): void {
 		add_action( 'wp', array( $this, 'check_access' ) );
@@ -93,9 +93,54 @@ class Plugin implements PluginInterface {
 	}
 
 	/**
+	 * Add settings link to the plugin action links
+	 *
+	 * @param array $links Existing plugin action links.
+	 * @return array Modified plugin action links.
+	 */
+	public function add_plugin_settings_link( array $links ): array {
+		$settings_link = sprintf(
+			'<a href="%s">%s</a>',
+			admin_url( 'options-general.php?page=access-defender' ),
+			esc_html__( 'Settings', 'access-defender' )
+		);
+
+		array_unshift( $links, $settings_link );
+		return $links;
+	}
+
+	/**
+	 * Add custom row meta links for the plugin
+	 *
+	 * @param array  $links Existing row meta links.
+	 * @param string $file  Current plugin file.
+	 * @return array Modified row meta links.
+	 */
+	public function plugin_row_meta( array $links, string $file ): array {
+		if ( plugin_basename( ACCESS_DEFENDER_FILE ) === $file ) {
+			$row_meta = array(
+				'docs'    => sprintf(
+					'<a href="%s" target="_blank">%s</a>',
+					'https://wordpress.org/plugins/access-defender/#description',
+					esc_html__( 'Documentation', 'access-defender' )
+				),
+				'support' => sprintf(
+					'<a href="%s" target="_blank">%s</a>',
+					'https://wordpress.org/support/plugin/access-defender/',
+					esc_html__( 'Support', 'access-defender' )
+				),
+			);
+
+			return array_merge( $links, $row_meta );
+		}
+
+		return $links;
+	}
+
+	/**
 	 * Check user access
 	 *
-	 * Triggers the access checking functionality.
+	 * @return void
 	 */
 	public function check_access(): void {
 		$this->access_checker->check_access();
@@ -104,9 +149,8 @@ class Plugin implements PluginInterface {
 	/**
 	 * Enqueue admin assets
 	 *
-	 * Loads the necessary CSS and JavaScript files for the admin interface.
-	 *
 	 * @param string $hook The current admin page hook.
+	 * @return void
 	 */
 	public function enqueue_admin_assets( string $hook ): void {
 		if ( 'settings_page_access-defender' !== $hook ) {
