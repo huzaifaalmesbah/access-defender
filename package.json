@@ -4,6 +4,8 @@
     "gettext-parser": "^8.0.0"
   },
   "scripts": {
-    "bundle": "dir-archiver --src . --dest ../access-defender.zip --exclude .DS_Store .git .wordpress-org  .gitattributes .github .gitignore .distignore .idea README.md composer.json composer.lock node_modules vendor  package-lock.json package.json phpcs.xml.dist"
+    "make-pot": "composer run-script make-pot",
+    "install-prod": "composer install --no-dev",
+    "bundle": "npm run install-prod && dir-archiver --src . --dest ../access-defender.zip --exclude .DS_Store .git .wordpress-org  .gitattributes .github .gitignore .distignore .idea README.md composer.json composer.lock node_modules package-lock.json package.json phpcs.xml.dist"
   }
 }

@@ -1,16 +1,19 @@
 <?php
 /**
- * Uninstall script for Access Defender plugin.
+ * Uninstall File
  *
- * This file is called when the plugin is uninstalled.
+ * This file runs when the plugin is uninstalled via the Plugins screen.
  *
  * @package AccessDefender
  */
 
-// If uninstall is not called from WordPress, exit.
-if ( ! defined( 'ABSPATH' ) ) {
+// Exit if accessed directly.
+if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-// Delete the options stored in the database.
-delete_option( 'accessdefender_options' );
+// Load the ActivationHooks class.
+require_once plugin_dir_path( __FILE__ ) . 'src/Core/ActivationHooks.php';
+
+// Run uninstall tasks.
+AccessDefender\Core\ActivationHooks::uninstall();

@@ -2,9 +2,9 @@
 Contributors: huzaifaalmesbah
 Tags: security, access control, ip-detection, proxy
 Requires at least: 5.9
-Tested up to: 6.6.2
+Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,6 +18,9 @@ Access Defender is a WordPress plugin designed to improve website security by bl
 * Detect and block users who access your site using VPNs, proxies, or hosting providers.
 * Customizable warning message and title.
 * Simple settings page to enable or disable blocking.
+* Enhanced IP detection using multiple HTTP headers.
+* Bypass checks for admin users.
+* Detection and verification of search engine bots.
 
 === Why use Access Defender? ===
 VPNs and proxies can sometimes be used to hide malicious intent. By using Access Defender, you can block users with masked IP addresses, ensuring better control over the security of your website.
@@ -69,12 +72,12 @@ Yes! You can customize the warning title and message via the plugin's settings p
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-* Initial release with VPN and proxy detection using ip-api.com API.
-* Added customizable warning messages.
-* Improved IP address detection methods.
-
-== Changelog ==
+= 1.0.1 =
+* Updated to improve compatibility with the latest WordPress version.
+* Minor bug fixes and performance improvements.
+* Enhanced IP detection using multiple HTTP headers.
+* Bypass checks for admin users.
+* Detection and verification of search engine bots.
 
 = 1.0.0 =
 * Initial release with VPN and proxy detection using ip-api.com API.
