@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy to WordPress.org
 
 on:
   release:
@@ -9,9 +9,15 @@ jobs:
   deploy:
     name: Deploy to WordPress.org
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install SVN
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y subversion
 
       - name: Install PHP dependencies
         uses: ramsey/composer-install@57532f8be5bda426838819c5ee9afb8af389d51a
