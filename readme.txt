@@ -4,7 +4,7 @@ Tags: security, access control, ip-detection, proxy
 Requires at least: 5.9
 Tested up to: 6.7.1
 Requires PHP: 7.4
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -71,6 +71,11 @@ Yes! You can customize the warning title and message via the plugin's settings p
 2. **Blocked User Screen** – Example of the custom warning message shown to blocked users.
 
 == Upgrade Notice ==
+
+= 1.0.2 =
+* Improved dashboard UI for better user experience
+* Enhanced settings page layout and styling
+* Added responsive design elements to admin interface
 
 = 1.0.1 =
 * Updated to improve compatibility with the latest WordPress version.

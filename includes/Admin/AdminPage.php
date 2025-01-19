@@ -62,7 +62,7 @@ class AdminPage {
 	 */
 	public function render_admin_page(): void {
 		$this->options = get_option( 'accessdefender_options', array() );
-		require_once ACCESS_DEFENDER_PATH . 'src/Views/admin/settings-page.php';
+		require_once ACCESS_DEFENDER_PATH . 'includes/Views/admin/settings-page.php';
 	}
 
 	/**
@@ -164,12 +164,12 @@ class AdminPage {
 		$value = $this->options[ $field ] ?? '';
 		?>
 		<input type="text" name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
-				value="<?php echo esc_attr( $value ); ?>" class="regular-text">
+				value="<?php echo esc_attr( $value ); ?>" class="regular-text" style="width: 100%;">
 		<?php
 	}
 
 	/**
-	 * Render a textarea field for the settings page.
+	 * Render a textarea field for the settings page using WordPress editor.
 	 *
 	 * @param array $args Field arguments, including the field name.
 	 * @return void
@@ -177,10 +177,19 @@ class AdminPage {
 	public function render_textarea_field( $args ): void {
 		$field = $args[0];
 		$value = $this->options[ $field ] ?? '';
-		?>
-		<textarea name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
-					rows="5" class="large-text"><?php echo esc_textarea( $value ); ?></textarea>
-		<?php
+
+		wp_editor(
+			$value,
+			'accessdefender_' . $field,
+			array(
+				'textarea_name' => 'accessdefender_options[' . $field . ']',
+				'textarea_rows' => 2,
+				'editor_class'  => 'regular-text',
+				'media_buttons' => false,
+				'teeny'         => true,
+				'quicktags'     => true,
+			)
+		);
 	}
 
 	/**

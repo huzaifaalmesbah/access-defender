@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Access Defender
  * Description: Blocks users using VPN or proxy while allowing search engines and legitimate bots.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: Huzaifa Al Mesbah
  * Author URI: https://www.linkedin.com/in/huzaifaalmesbah/
  * Text Domain: access-defender
@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'ACCESS_DEFENDER_VERSION', '1.0.1' );
+define( 'ACCESS_DEFENDER_VERSION', '1.0.2' );
 define( 'ACCESS_DEFENDER_FILE', __FILE__ );
 define( 'ACCESS_DEFENDER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ACCESS_DEFENDER_URL', plugin_dir_url( __FILE__ ) );
