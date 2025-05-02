@@ -4,8 +4,63 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a3062b3bd5b1f05834dff25e96f86d14",
-    "packages": [],
+    "content-hash": "0eb42c634c24ac1d40a9ed1616eb3cfa",
+    "packages": [
+        {
+            "name": "appsero/client",
+            "version": "v2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Appsero/client.git",
+                "reference": "12ff65b9770286d21edf314e7acfcd26fdde3315"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Appsero/client/zipball/12ff65b9770286d21edf314e7acfcd26fdde3315",
+                "reference": "12ff65b9770286d21edf314e7acfcd26fdde3315",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.2",
+                "phpcompatibility/phpcompatibility-wp": "dev-master",
+                "phpunit/phpunit": "^8.5.31",
+                "squizlabs/php_codesniffer": "^3.7",
+                "tareq1988/wp-php-cs-fixer": "dev-master",
+                "wp-coding-standards/wpcs": "dev-develop"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Appsero\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tareq Hasan",
+                    "email": "tareq@appsero.com"
+                }
+            ],
+            "description": "Appsero Client",
+            "keywords": [
+                "analytics",
+                "plugin",
+                "theme",
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/Appsero/client/issues",
+                "source": "https://github.com/Appsero/client/tree/v2.0.4"
+            },
+            "time": "2024-11-25T05:58:23+00:00"
+        }
+    ],
     "packages-dev": [
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
@@ -1233,10 +1288,12 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": {},
-    "platform-dev": {},
+    "platform": {
+        "php": ">=7.4"
+    },
+    "platform-dev": [],
     "plugin-api-version": "2.6.0"
 }

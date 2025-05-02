@@ -9,7 +9,8 @@
         }
     },
     "require": {
-        "php": ">=7.4"
+        "php": ">=7.4",
+        "appsero/client": "^2.0"
     },
     "require-dev": {
         "wp-coding-standards/wpcs": "^3.1",

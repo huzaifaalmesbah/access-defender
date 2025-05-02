@@ -2,9 +2,9 @@
 Contributors: huzaifaalmesbah
 Tags: security, access control, ip-detection, proxy
 Requires at least: 5.9
-Tested up to: 6.7.1
+Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -30,7 +30,7 @@ VPNs and proxies can sometimes be used to hide malicious intent. By using Access
 * Special thanks to the team at **ip-api.com** for providing reliable and accurate IP detection services.
 
 === Third-party API Usage ===
-This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking the visitor's IP address. For more information on ip-api.com’s privacy practices, please see the **Privacy Policy and Terms of Use** below.
+This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking the visitor's IP address. For more information on ip-api.com's privacy practices, please see the **Privacy Policy and Terms of Use** below.
 
 == Installation ==
 
@@ -98,8 +98,17 @@ This plugin uses a third-party API (ip-api.com) to detect if users are accessing
 
 By using the Access Defender plugin, you agree to the terms of use set forth by the ip-api.com API service. Make sure to review their privacy policies before enabling this plugin.
 
+=== Appsero SDK and Analytics ===
+Access Defender uses [Appsero](https://appsero.com) SDK to collect some telemetry data upon user's confirmation. This helps us to troubleshoot problems faster & make product improvements.
+
+Appsero SDK **does not gather any data by default.** The SDK only starts gathering basic telemetry data **when a user allows it via the admin notice**. We collect the data to ensure a great user experience for all our users. 
+
+Integrating Appsero SDK **DOES NOT IMMEDIATELY** start gathering data, **without confirmation from users in any case.**
+
+Learn more about how [Appsero collects and uses this data](https://appsero.com/privacy-policy/).
+
 == License ==
 This plugin is licensed under the GPLv2 or later. For more information, please review the [GPLv2 license](https://www.gnu.org/licenses/gpl-2.0.html).
 
 == Terms of Use and Disclaimer ==
-Access Defender is provided as-is, without any warranty. While we strive to provide a high level of security, it is important to note that no security measure is 100% foolproof. The plugin uses third-party services, and their availability or changes to their terms could affect the plugin’s functionality.
+Access Defender is provided as-is, without any warranty. While we strive to provide a high level of security, it is important to note that no security measure is 100% foolproof. The plugin uses third-party services, and their availability or changes to their terms could affect the plugin's functionality.
