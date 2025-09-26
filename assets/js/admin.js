@@ -136,13 +136,15 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // Debounced auto-validate on input and validate on blur
+    // Debounced auto-validate on input with in-flight aborting and ajaxurl fallback
     var validateTimers = {};
+    var inflightXhrs = {};
     $(document).on('input', '.api-key-input', function() {
         var $input = $(this);
         var provider = $input.data('provider');
         var apiKey = $input.val().trim();
         var $status = $('#status-' + provider);
+        var ajaxUrl = (window.accessdefender_admin && accessdefender_admin.ajaxurl) ? accessdefender_admin.ajaxurl : (window.ajaxurl || '/wp-admin/admin-ajax.php');
 
         if (!provider) return;
 
@@ -154,9 +156,15 @@ jQuery(document).ready(function($) {
 
         validateTimers[provider] = setTimeout(function() {
             $status.text('Validating...').css('color', '#666');
-            $.ajax({
-                url: accessdefender_admin.ajaxurl,
+            // Abort any in-flight request for this provider
+            if (inflightXhrs[provider] && inflightXhrs[provider].readyState !== 4) {
+                try { inflightXhrs[provider].abort(); } catch (e) {}
+            }
+
+            inflightXhrs[provider] = $.ajax({
+                url: ajaxUrl,
                 type: 'POST',
+                cache: false,
                 data: {
                     action: 'accessdefender_validate_api_key',
                     provider: provider,
@@ -170,11 +178,14 @@ jQuery(document).ready(function($) {
                         $status.text('✗ Invalid').css('color', '#dc3232');
                     }
                 },
-                error: function() {
-                    $status.text('✗ Error validating').css('color', '#dc3232');
+                error: function(xhr) {
+                    if (xhr && xhr.statusText === 'abort') { return; }
+                    var msg = '✗ Error validating';
+                    if (xhr && xhr.status) { msg += ' (' + xhr.status + ')'; }
+                    $status.text(msg).css('color', '#dc3232');
                 }
             });
-        }, 600);
+        }, 1000);
     });
 
     // Removed blur-based validation to avoid duplicate checks
