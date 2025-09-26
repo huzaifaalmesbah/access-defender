@@ -13,7 +13,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 // Load the ActivationHooks class.
-require_once plugin_dir_path( __FILE__ ) . 'src/Core/ActivationHooks.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/Core/ActivationHooks.php';
 
 // Run uninstall tasks.
 AccessDefender\Core\ActivationHooks::uninstall();

@@ -4,7 +4,7 @@ Tags: security, access control, ip-detection, proxy
 Requires at least: 5.9
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.3
+Stable tag: 1.0.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,7 +70,21 @@ Yes! You can customize the warning title and message via the plugin's settings p
 1. **Settings Page** – Configure the plugin settings, including enabling VPN blocking and setting custom warning messages.
 2. **Blocked User Screen** – Example of the custom warning message shown to blocked users.
 
+== Changelog ==
+
+= 1.0.4 =
+* Fixed: Corrected file path in uninstall.php to prevent fatal error during plugin uninstallation
+* Fixed: Updated require_once path from 'src/Core/ActivationHooks.php' to 'includes/Core/ActivationHooks.php'
+
+= 1.0.3 =
+* Improved dashboard UI for better user experience
+* Enhanced settings page layout and styling
+* Added responsive design elements to admin interface
+
 == Upgrade Notice ==
+
+= 1.0.4 =
+* Fixed critical uninstall error - update recommended for proper plugin removal
 
 = 1.0.2 =
 * Improved dashboard UI for better user experience
