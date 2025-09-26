@@ -297,7 +297,7 @@ class AdminPage {
 				<strong>Use Paid Provider</strong> - Single reliable paid API service
 			</label>
 		</div>
-		<p class="description">Choose your preferred detection method. The free endpoint is limited to 45 requests per minute. For higher usage, consider upgrading to a paid provider.</p>
+		<p class="description">Choose your preferred detection method. The free endpoint is limited to 45 unique requests per minute. For higher usage, consider upgrading to a paid provider.</p>
 		<?php
 	}
 
@@ -337,7 +337,7 @@ class AdminPage {
 					<span class="provider-badge free">Free</span>
 				</h4>
 				<p class="provider-limit-info">
-					<strong>Rate Limit:</strong> 45 requests per minute
+					<strong>Rate Limit:</strong> 45 unique requests per minute
 				</p>
 								<?php
 								$stats = $provider->get_usage_stats();
@@ -489,10 +489,10 @@ class AdminPage {
 			<?php endforeach; ?>
 			<div id="no-api-key-needed" style="<?php echo $provider_mode !== 'free' ? 'display: none;' : ''; ?>">
 				<p style="color: #46b450; font-weight: 600;">✓ No API keys required for free providers!</p>
-				<p style="color: #0073aa; font-size: 13px; margin-top: 10px;">
-					<strong>Note:</strong> The free endpoint is limited to 45 requests per minute. This is suitable for most small to medium websites. 
-					For high-traffic sites, consider using a paid provider for unlimited requests.
-				</p>
+			<p style="color: #0073aa; font-size: 13px; margin-top: 10px;">
+				<strong>Note:</strong> The free endpoint is limited to 45 unique requests per minute. This is suitable for most small to medium websites. 
+				For high-traffic sites, consider using a paid provider for unlimited requests.
+			</p>
 			</div>
 		</div>
 		<?php

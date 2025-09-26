@@ -32,12 +32,13 @@ VPNs and proxies can sometimes be used to hide malicious intent. By using Access
 === Supported API Providers: ===
 
 **Free Providers:**
-* **IP-API.com (Free)**: 45 requests per minute - Reliable free service
+* **IP-API.com (Free)**: 45 unique requests per minute - Reliable free service
 
 **Paid Providers:**
-* **IP-API.com (Pro)**: High-performance paid tier with 1,000 requests per minute
 * **ProxyCheck.io**: Effective proxy/VPN detection service
 * **IPGeolocation.io**: Accurate geolocation and VPN detection service
+* **IP-API.com (Pro)**: Coming soon
+
 
 === Third-party API Usage ===
 This plugin uses multiple third-party APIs to detect VPN or proxy usage by checking the visitor's IP address. The specific API used depends on your configuration (free auto-rotation or selected paid provider). For more information on each provider's privacy practices, please see their respective privacy policies.
