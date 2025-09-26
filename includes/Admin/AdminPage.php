@@ -381,26 +381,29 @@ class AdminPage {
 		?>
 		<div class="paid-providers-section" style="<?php echo $provider_mode !== 'paid' ? 'display: none;' : ''; ?>">
 			<div class="access-defender-providers-grid">
-				<?php foreach ( $providers as $slug => $provider ) : ?>
+		<?php foreach ( $providers as $slug => $provider ) : ?>
 					<?php if ( ! $provider->is_free() ) : ?>
-						<?php $is_proxycheck = ( $slug === 'proxycheck' ); ?>
-						<div class="provider-card <?php echo $value === $slug ? 'selected' : ''; ?> <?php echo $is_proxycheck ? '' : 'disabled'; ?>">
-							<label style="cursor: <?php echo $is_proxycheck ? 'pointer' : 'not-allowed'; ?>; display: block; opacity: <?php echo $is_proxycheck ? '1' : '0.6'; ?>;">
+				<?php 
+					$enabled_paid_slugs = array( 'proxycheck', 'ipgeolocation' );
+					$is_enabled = in_array( $slug, $enabled_paid_slugs, true );
+				?>
+				<div class="provider-card <?php echo $value === $slug ? 'selected' : ''; ?> <?php echo $is_enabled ? '' : 'disabled'; ?>">
+					<label style="cursor: <?php echo $is_enabled ? 'pointer' : 'not-allowed'; ?>; display: block; opacity: <?php echo $is_enabled ? '1' : '0.6'; ?>;">
 								<input type="radio" 
 									   name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
 									   value="<?php echo esc_attr( $slug ); ?>"
 									   <?php checked( $value, $slug ); ?>
-									   <?php echo $is_proxycheck ? '' : 'disabled'; ?>
+							   <?php echo $is_enabled ? '' : 'disabled'; ?>
 									   style="margin-right: 8px;">
 				<h4><?php echo esc_html( $provider->get_name() ); ?>
 					<span class="provider-badge paid">Paid</span>
 				</h4>
-				<?php if ( method_exists( $provider, 'get_signup_url' ) ) : ?>
+						<?php if ( method_exists( $provider, 'get_signup_url' ) ) : ?>
 					<p class="provider-signup-link">
 						<a href="<?php echo esc_url( $provider->get_signup_url() ); ?>" target="_blank" class="button button-secondary button-small">
 							Get API Key
 						</a>
-						<?php if ( $is_proxycheck ) : ?>
+								<?php if ( $is_enabled ) : ?>
 							<span style="margin-left:8px; font-size:12px; color:#555;">Free signup includes 1,000 requests/day. Upgrade anytime.</span>
 						<?php else : ?>
 							<span style="margin-left:8px; font-size:12px; color:#a00;">Coming soon</span>
@@ -537,6 +540,26 @@ class AdminPage {
 					if ( function_exists( 'add_settings_error' ) ) {
 						add_settings_error( 'accessdefender_options', 'accessdefender_no_paid_provider', __( 'Please select an active paid provider and provide a valid API key. Falling back to free provider.', 'access-defender' ), 'error' );
 					}
+				} else {
+					// Validate API key for selected paid provider; fallback to free if invalid
+					$api_key = $sanitized['api_keys'][ $sanitized['paid_provider'] ] ?? '';
+					if ( empty( $api_key ) ) {
+						$sanitized['provider_mode']  = 'free';
+						$sanitized['free_providers'] = array( 'ip-api' );
+						if ( function_exists( 'add_settings_error' ) ) {
+							add_settings_error( 'accessdefender_options', 'accessdefender_invalid_api_key', __( 'Please select an active paid provider and provide a valid API key. Falling back to free provider.', 'access-defender' ), 'error' );
+						}
+					} else {
+						// Use provider manager to validate key remotely
+						$provider_manager = new \AccessDefender\Services\ApiProviderManager();
+						if ( ! $provider_manager->validate_api_key( $sanitized['paid_provider'], $api_key ) ) {
+							$sanitized['provider_mode']  = 'free';
+							$sanitized['free_providers'] = array( 'ip-api' );
+							if ( function_exists( 'add_settings_error' ) ) {
+								add_settings_error( 'accessdefender_options', 'accessdefender_invalid_api_key', __( 'Please select an active paid provider and provide a valid API key. Falling back to free provider.', 'access-defender' ), 'error' );
+							}
+						}
+					}
 				}
 			}
 		}
@@ -612,8 +635,8 @@ class AdminPage {
 		}
 
 		if ( isset( $input['paid_provider'] ) ) {
-			// Temporarily restrict to proxycheck only (others coming soon)
-			$valid_paid_providers = array( 'proxycheck' );
+			// Allow only active paid providers; others are coming soon
+			$valid_paid_providers = array( 'proxycheck', 'ipgeolocation' );
 			$sanitized['paid_provider'] = in_array( $input['paid_provider'], $valid_paid_providers, true )
 				? $input['paid_provider'] : 'proxycheck';
 		}

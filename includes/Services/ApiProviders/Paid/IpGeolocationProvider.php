@@ -26,7 +26,7 @@ class IpGeolocationProvider extends BaseProvider {
 	 *
 	 * @var string
 	 */
-	private $api_url = 'https://api.ipgeolocation.io/ipgeo';
+    private $api_url = 'https://api.ipgeolocation.io/v2/security';
 
 	/**
 	 * Get provider name
@@ -84,8 +84,9 @@ class IpGeolocationProvider extends BaseProvider {
 			return false;
 		}
 
-		$test_response = $this->make_request( $this->api_url . '?apiKey=' . $api_key . '&ip=8.8.8.8' );
-		return $test_response['success'] && isset( $test_response['data']['ip'] );
+        $test_url      = $this->api_url . '?apiKey=' . $api_key . '&ip=8.8.8.8&include=location';
+        $test_response = $this->make_request( $test_url );
+        return $test_response['success'] && isset( $test_response['data']['ip'] );
 	}
 
 	/**
@@ -106,7 +107,7 @@ class IpGeolocationProvider extends BaseProvider {
 			return $cached;
 		}
 
-		$url = $this->api_url . '?apiKey=' . $api_key . '&ip=' . $ip . '&fields=geo,security';
+        $url = $this->api_url . '?apiKey=' . $api_key . '&ip=' . $ip . '&include=location';
 
 		$response = $this->make_request( $url );
 
@@ -123,30 +124,30 @@ class IpGeolocationProvider extends BaseProvider {
 			return false;
 		}
 
-		// Parse security information
-		$is_proxy = false;
-		$is_vpn   = false;
-		if ( isset( $data['security'] ) ) {
-			$is_proxy = ! empty( $data['security']['is_proxy'] );
-			$is_vpn   = ! empty( $data['security']['is_vpn'] );
-		}
+        // Parse security and location information from v2/security response
+        $security = $data['security'] ?? array();
+        $location = $data['location'] ?? array();
 
-		$result = array(
-			'ip'           => $data['ip'] ?? $ip,
-			'country'      => $data['country_name'] ?? '',
-			'country_code' => $data['country_code2'] ?? '',
-			'region'       => $data['state_prov'] ?? '',
-			'city'         => $data['city'] ?? '',
-			'latitude'     => isset( $data['latitude'] ) ? (float) $data['latitude'] : null,
-			'longitude'    => isset( $data['longitude'] ) ? (float) $data['longitude'] : null,
-			'timezone'     => $data['time_zone']['name'] ?? '',
-			'isp'          => $data['isp'] ?? '',
-			'organization' => $data['organization'] ?? '',
-			'as_number'    => '',
-			'is_proxy'     => $is_proxy || $is_vpn,
-			'is_hosting'   => false, // Not provided by this API
-			'provider'     => $this->get_slug(),
-		);
+        $is_proxy = ! empty( $security['is_proxy'] );
+        $is_tor   = ! empty( $security['is_tor'] );
+        $is_bot   = ! empty( $security['is_bot'] );
+
+        $result = array(
+            'ip'           => $data['ip'] ?? $ip,
+            'country'      => $location['country_name'] ?? '',
+            'country_code' => $location['country_code2'] ?? '',
+            'region'       => $location['state_prov'] ?? '',
+            'city'         => $location['city'] ?? '',
+            'latitude'     => isset( $location['latitude'] ) ? (float) $location['latitude'] : null,
+            'longitude'    => isset( $location['longitude'] ) ? (float) $location['longitude'] : null,
+            'timezone'     => '',
+            'isp'          => '',
+            'organization' => '',
+            'as_number'    => '',
+            'is_proxy'     => $is_proxy || $is_tor || $is_bot,
+            'is_hosting'   => ! empty( $security['is_cloud_provider'] ),
+            'provider'     => $this->get_slug(),
+        );
 
 		$this->cache_result( $ip, $result );
 		$this->log_usage( true );

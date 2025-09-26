@@ -152,7 +152,6 @@ Depending on your configuration, IP addresses may be shared with:
 - **IP-API.com**: For both free and paid tiers - [Privacy Policy](https://ip-api.com/docs/legal)
 - **ProxyCheck.io**: For paid service - [Privacy Policy](https://proxycheck.io/)
 - **IPGeolocation.io**: For paid service - [Privacy Policy](https://ipgeolocation.io/privacy-policy)
-- **IPWhois.app**: For free service - [Privacy Policy](https://ipwhois.app/privacy-policy)
 
 Each provider collects IP addresses solely for the purpose of identifying VPNs, proxies, and hosting providers. They do not collect personally identifiable information beyond the IP address.
 

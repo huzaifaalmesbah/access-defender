@@ -99,7 +99,7 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // API Key validation - only on link click
+    // API Key validation - on link click
     $(document).on('click', '.api-key-validate-link', function(e) {
         e.preventDefault();
         var provider = $(this).data('provider');
@@ -135,6 +135,49 @@ jQuery(document).ready(function($) {
             }
         });
     });
+
+    // Debounced auto-validate on input and validate on blur
+    var validateTimers = {};
+    $(document).on('input', '.api-key-input', function() {
+        var $input = $(this);
+        var provider = $input.data('provider');
+        var apiKey = $input.val().trim();
+        var $status = $('#status-' + provider);
+
+        if (!provider) return;
+
+        clearTimeout(validateTimers[provider]);
+        if (apiKey === '') {
+            $status.text('');
+            return;
+        }
+
+        validateTimers[provider] = setTimeout(function() {
+            $status.text('Validating...').css('color', '#666');
+            $.ajax({
+                url: accessdefender_admin.ajaxurl,
+                type: 'POST',
+                data: {
+                    action: 'accessdefender_validate_api_key',
+                    provider: provider,
+                    api_key: apiKey,
+                    nonce: accessdefender_admin.nonce
+                },
+                success: function(response) {
+                    if (response.success && response.data === true) {
+                        $status.text('✓ Valid').css('color', '#46b450');
+                    } else {
+                        $status.text('✗ Invalid').css('color', '#dc3232');
+                    }
+                },
+                error: function() {
+                    $status.text('✗ Error validating').css('color', '#dc3232');
+                }
+            });
+        }, 600);
+    });
+
+    // Removed blur-based validation to avoid duplicate checks
 
     // Provider status dashboard
     if ($('.provider-status').length) {
