@@ -403,9 +403,13 @@ class AdminPage {
 						<a href="<?php echo esc_url( $provider->get_signup_url() ); ?>" target="_blank" class="button button-secondary button-small">
 							Get API Key
 						</a>
-								<?php if ( $is_enabled ) : ?>
-							<span style="margin-left:8px; font-size:12px; color:#555;">Free signup includes 1,000 requests/day. Upgrade anytime.</span>
-						<?php else : ?>
+							<?php if ( $is_enabled ) : ?>
+							<?php if ( $slug === 'ipgeolocation' ) : ?>
+								<span style="margin-left:8px; font-size:12px; color:#555;">Requires API key from the IPGeolocation.io Security (Security API) package for proxy/VPN detection.</span>
+							<?php elseif ( $slug === 'proxycheck' ) : ?>
+								<span style="margin-left:8px; font-size:12px; color:#555;">Free signup includes 1,000 requests/day. Upgrade anytime.</span>
+							<?php endif; ?>
+							<?php else : ?>
 							<span style="margin-left:8px; font-size:12px; color:#a00;">Coming soon</span>
 						<?php endif; ?>
 					</p>
