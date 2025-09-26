@@ -12,10 +12,10 @@
 namespace AccessDefender\Services;
 
 use AccessDefender\Interfaces\ApiProviderInterface;
-use AccessDefender\Services\ApiProviders\IpApiProvider;
-use AccessDefender\Services\ApiProviders\IpInfoProvider;
-use AccessDefender\Services\ApiProviders\IpGeolocationProvider;
-use AccessDefender\Services\ApiProviders\FreeipApiProvider;
+use AccessDefender\Services\ApiProviders\Free\IpApiProvider;
+use AccessDefender\Services\ApiProviders\Paid\IpApiPaidProvider;
+use AccessDefender\Services\ApiProviders\Paid\ProxyCheckProvider;
+use AccessDefender\Services\ApiProviders\Paid\IpGeolocationProvider;
 
 /**
  * ApiProviderManager Class
@@ -42,7 +42,14 @@ class ApiProviderManager {
 	 * Constructor
 	 */
 	public function __construct() {
-		$this->options = get_option( 'accessdefender_options', array() );
+		// Load new options structure with backward compatibility
+		$core_settings     = get_option( 'accessdefender_core_settings', array() );
+		$provider_settings = get_option( 'accessdefender_provider_settings', array() );
+		$legacy_options    = get_option( 'accessdefender_options', array() );
+		
+		// Merge all options with priority: provider_settings > core_settings > legacy_options
+		$this->options = array_merge( $legacy_options, $core_settings, $provider_settings );
+		
 		$this->init_providers();
 	}
 
@@ -54,12 +61,12 @@ class ApiProviderManager {
 	private function init_providers(): void {
 		$this->providers = array(
 			// Free providers (no API key required) with VPN/Proxy detection
-			'ip-api'        => new IpApiProvider(),        // Has proxy/hosting fields
-			'freeipapi'     => new FreeipApiProvider(),    // Keyword-based VPN detection
+			'ip-api'         => new IpApiProvider(),        // Has proxy/hosting fields
 			
-			// Paid providers with advanced VPN/Proxy detection
-			'ipinfo'        => new IpInfoProvider(),       // Privacy data with VPN/proxy fields
-			'ipgeolocation' => new IpGeolocationProvider(), // Security data with VPN detection
+			// Paid providers with advanced VPN/Proxy detection (ordered by preference)
+			'proxycheck'     => new ProxyCheckProvider(),   // Proxy/VPN detection via proxycheck.io
+			'ip-api-paid'    => new IpApiPaidProvider(),    // IP-API Pro - Premium with higher limits
+			'ipgeolocation'  => new IpGeolocationProvider(), // Security data with VPN detection
 		);
 	}
 
@@ -96,7 +103,7 @@ class ApiProviderManager {
 		$free_providers = $this->options['free_providers'] ?? array( 'ip-api' );
 		$available_providers = array();
 
-		// Check which providers are available (not rate limited)
+		// Check providers in order (sequential rotation, not random)
 		foreach ( $free_providers as $slug ) {
 			if ( isset( $this->providers[ $slug ] ) && $this->providers[ $slug ]->is_free() ) {
 				$provider = $this->providers[ $slug ];
@@ -116,15 +123,10 @@ class ApiProviderManager {
 			}
 		}
 
-		// If we have available providers, randomly shuffle them for rotation
+		// Return providers in original order (sequential rotation)
+		// First available provider will be used until it hits limit, then next one
 		if ( ! empty( $available_providers ) ) {
-			$keys = array_keys( $available_providers );
-			shuffle( $keys );
-			$shuffled_providers = array();
-			foreach ( $keys as $key ) {
-				$shuffled_providers[ $key ] = $available_providers[ $key ];
-			}
-			return $shuffled_providers;
+			return $available_providers;
 		}
 
 		// Fallback: if all providers are rate limited, try to find one with least usage
@@ -286,7 +288,7 @@ class ApiProviderManager {
 		$active_providers = $this->get_active_providers();
 		$api_keys         = $this->options['api_keys'] ?? array();
 
-		// Try each provider in random order
+		// Try each provider in sequential order (first available until limit hit, then next)
 		foreach ( $active_providers as $slug => $provider ) {
 			$api_key = $api_keys[ $slug ] ?? '';
 

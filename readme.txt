@@ -4,33 +4,43 @@ Tags: security, access control, ip-detection, proxy
 Requires at least: 5.9
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.0.4
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Blocks users using VPN or proxy and shows a warning notice using the free ip-api.com API with enhanced IP detection.
+Advanced VPN and proxy detection with multiple API providers (free and paid) for enhanced security and reliability.
 
 == Description ==
 
-Access Defender is a WordPress plugin designed to improve website security by blocking users who are using VPNs or proxies. This plugin uses the **ip-api.com** API to identify if a visitor is accessing your site through a VPN, proxy, or hosting provider. If detected, the user will be presented with a customizable warning message.
+Access Defender is a comprehensive WordPress plugin designed to improve website security by blocking users who are using VPNs or proxies. With version 1.1.0, the plugin now supports multiple API providers including both free and paid services for enhanced reliability and performance.
 
 === Features: ===
-* Detect and block users who access your site using VPNs, proxies, or hosting providers.
-* Customizable warning message and title.
-* Simple settings page to enable or disable blocking.
-* Enhanced IP detection using multiple HTTP headers.
-* Bypass checks for admin users.
-* Detection and verification of search engine bots.
+* **Multiple API Providers**: Choose between free providers with auto-rotation or reliable paid services
+* **Free Provider Auto-Rotation**: Automatically switches between free APIs when rate limits are reached
+* **Paid Provider Options**: Premium APIs with higher rate limits and better reliability
+* **Sequential Provider Management**: Smart rotation system that uses providers in order until limits are hit
+* **Real-time Usage Statistics**: Monitor API usage, success rates, and failures in real-time
+* **Customizable warning message and title**
+* **Enhanced IP detection using multiple HTTP headers**
+* **Bypass checks for admin users**
+* **Detection and verification of search engine bots**
+* **Organized Provider Structure**: Clean separation of free and paid providers
 
 === Why use Access Defender? ===
 VPNs and proxies can sometimes be used to hide malicious intent. By using Access Defender, you can block users with masked IP addresses, ensuring better control over the security of your website.
 
-=== Credits: ===
-* **API Provider**: This plugin uses the **ip-api.com** API for VPN and proxy detection. You can learn more about their services and usage at [ip-api.com](https://ip-api.com).
-* Special thanks to the team at **ip-api.com** for providing reliable and accurate IP detection services.
+=== Supported API Providers: ===
+
+**Free Providers:**
+* **IP-API.com (Free)**: 45 requests per minute - Reliable free service
+
+**Paid Providers:**
+* **IP-API.com (Pro)**: High-performance paid tier with 1,000 requests per minute
+* **ProxyCheck.io**: Effective proxy/VPN detection service
+* **IPGeolocation.io**: Accurate geolocation and VPN detection service
 
 === Third-party API Usage ===
-This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking the visitor's IP address. For more information on ip-api.com's privacy practices, please see the **Privacy Policy and Terms of Use** below.
+This plugin uses multiple third-party APIs to detect VPN or proxy usage by checking the visitor's IP address. The specific API used depends on your configuration (free auto-rotation or selected paid provider). For more information on each provider's privacy practices, please see their respective privacy policies.
 
 == Installation ==
 
@@ -49,28 +59,56 @@ This plugin uses the **ip-api.com** API to detect VPN or proxy usage by checking
 
 = Plugin Configuration: =
 1. Navigate to **Settings > Access Defender** in your WordPress dashboard.
-2. Configure the settings for Access Defender below:
+2. Configure the settings for Access Defender:
     - **Enable VPN Blocking**: Enable VPN and Proxy Blocking.
+    - **Provider Configuration**: Choose between free providers (with auto-rotation) or paid provider
+    - **Free Providers**: Select multiple free APIs that will rotate automatically when limits are reached
+    - **Paid Provider**: Choose a single reliable paid service and enter your API key
     - **Warning Title**: Enter the custom warning title (e.g., "Access Denied").
     - **Warning Message**: Enter the custom warning message to be shown to blocked users.
+3. **Monitor Usage**: View real-time statistics showing API usage, success rates, and failures for each provider.
 
 == Frequently Asked Questions ==
 
 = How does Access Defender work? =
-Access Defender uses the ip-api.com API to identify if a visitor is accessing your site through a VPN or proxy by looking up their IP address. If a VPN or proxy is detected, the visitor will be blocked from accessing your website and shown a customizable warning message.
+Access Defender uses multiple API providers to identify if a visitor is accessing your site through a VPN or proxy by looking up their IP address. You can choose between free providers (with automatic rotation) or paid providers for enhanced reliability. If a VPN or proxy is detected, the visitor will be blocked from accessing your website and shown a customizable warning message.
 
-= Is the ip-api.com API free? =
-Yes, ip-api.com provides a free tier, which allows a limited number of API requests per minute. You can check their website for more details on pricing and usage limits.
+= What's the difference between free and paid providers? =
+Free providers have rate limits (e.g., 45 requests/minute for IP-API.com) but the plugin automatically rotates between multiple free APIs when limits are reached. Paid providers offer higher rate limits, better reliability, and faster response times.
+
+= How does the auto-rotation work for free providers? =
+The plugin uses free providers sequentially - it will use the first provider until it hits the rate limit, then automatically switch to the next available provider. This ensures continuous service even with rate limitations.
+
+= Can I use multiple paid providers? =
+No, you can select only one paid provider at a time. However, you can easily switch between different paid providers in the settings.
 
 = Can I customize the warning message? =
 Yes! You can customize the warning title and message via the plugin's settings page. The message is shown to users blocked by Access Defender.
 
 == Screenshots ==
 
-1. **Settings Page** – Configure the plugin settings, including enabling VPN blocking and setting custom warning messages.
-2. **Blocked User Screen** – Example of the custom warning message shown to blocked users.
+1. **Settings Page** – Configure provider settings, choose between free auto-rotation or paid providers.
+2. **Provider Statistics** – Real-time monitoring of API usage, success rates, and provider status.
+3. **Blocked User Screen** – Example of the custom warning message shown to blocked users.
 
 == Changelog ==
+
+= 1.1.0 =
+* **Major Update**: Complete multi-provider system implementation
+* **New**: Added support for multiple API providers (free and paid)
+* **New**: Free provider auto-rotation system with sequential switching
+* **New**: Paid provider options with higher rate limits
+* **New**: Real-time usage statistics and monitoring
+* **New**: Dynamic API key management for paid providers
+* **New**: Organized provider structure (Free/Paid subdirectories)
+* **Added**: IP-API.com Pro (paid) service with 1,000 requests/minute
+* **Added**: IPGeolocation.io paid provider
+* **Added**: ProxyCheck.io as a paid provider
+* **Added**: API key validation via link
+* **Added**: Smart rate limiting with per-minute and monthly tracking
+* **Added**: Enhanced admin interface with dynamic provider selection
+* **Added**: Better error handling and fallback systems
+* **Fixed**: Plugin options structure and migration system
 
 = 1.0.4 =
 * Fixed: Corrected file path in uninstall.php to prevent fatal error during plugin uninstallation
@@ -82,6 +120,9 @@ Yes! You can customize the warning title and message via the plugin's settings p
 * Added responsive design elements to admin interface
 
 == Upgrade Notice ==
+
+= 1.1.0 =
+* Major update with multiple API providers, auto-rotation, and enhanced reliability. Existing settings will be automatically migrated.
 
 = 1.0.4 =
 * Fixed critical uninstall error - update recommended for proper plugin removal
@@ -104,13 +145,18 @@ Yes! You can customize the warning title and message via the plugin's settings p
 * Improved IP address detection methods.
 
 == Privacy and Data Collection ==
-This plugin uses a third-party API (ip-api.com) to detect if users are accessing your website through a VPN or proxy. **When a user visits your website, their IP address will be sent to the ip-api.com API** for analysis to determine if it belongs to a VPN or proxy.
+This plugin uses third-party APIs to detect if users are accessing your website through a VPN or proxy. **When a user visits your website, their IP address will be sent to the selected API provider(s)** for analysis to determine if it belongs to a VPN or proxy.
 
-=== ip-api.com Privacy Policy and Terms ===
-- ip-api.com collects IP addresses solely for the purpose of identifying VPNs, proxies, and hosting providers. They do not collect any personally identifiable information beyond the IP address.
-- You can view their Terms and Policies [here](https://ip-api.com/docs/legal).
+=== Data Sharing with API Providers ===
+Depending on your configuration, IP addresses may be shared with:
+- **IP-API.com**: For both free and paid tiers - [Privacy Policy](https://ip-api.com/docs/legal)
+- **ProxyCheck.io**: For paid service - [Privacy Policy](https://proxycheck.io/)
+- **IPGeolocation.io**: For paid service - [Privacy Policy](https://ipgeolocation.io/privacy-policy)
+- **IPWhois.app**: For free service - [Privacy Policy](https://ipwhois.app/privacy-policy)
 
-By using the Access Defender plugin, you agree to the terms of use set forth by the ip-api.com API service. Make sure to review their privacy policies before enabling this plugin.
+Each provider collects IP addresses solely for the purpose of identifying VPNs, proxies, and hosting providers. They do not collect personally identifiable information beyond the IP address.
+
+By using the Access Defender plugin, you agree to the terms of use set forth by the API service(s) you have configured. Make sure to review their privacy policies before enabling this plugin.
 
 === Appsero SDK and Analytics ===
 Access Defender uses [Appsero](https://appsero.com) SDK to collect some telemetry data upon user's confirmation. This helps us to troubleshoot problems faster & make product improvements.

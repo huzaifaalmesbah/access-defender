@@ -225,6 +225,8 @@ abstract class BaseProvider implements ApiProviderInterface {
 			'is_free'       => $this->is_free(),
 			'rate_limit'    => $this->get_rate_limit(),
 			'monthly_usage' => $stats['monthly_usage'],
+			'total_success' => $stats['total_success'],
+			'total_failed'  => $stats['total_failed'],
 			'success_rate'  => $stats['success_rate'],
 			'status'        => $stats['success_rate'] > 80 ? 'healthy' : 'degraded',
 		);

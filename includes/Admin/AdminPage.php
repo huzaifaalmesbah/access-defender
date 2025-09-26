@@ -29,6 +29,24 @@ class AdminPage {
 	private $options;
 
 	/**
+	 * Core plugin settings
+	 *
+	 * @since 1.1.0
+	 * @var array
+	 * @access private
+	 */
+	private $core_settings;
+
+	/**
+	 * Provider settings
+	 *
+	 * @since 1.1.0
+	 * @var array
+	 * @access private
+	 */
+	private $provider_settings;
+
+	/**
 	 * Initializes the admin page.
 	 *
 	 * Adds the menu item for the settings page and initializes the settings.
@@ -61,7 +79,14 @@ class AdminPage {
 	 * @since 1.0.1
 	 */
 	public function render_admin_page(): void {
-		$this->options = get_option( 'accessdefender_options', array() );
+		// Load new options structure
+		$this->core_settings     = get_option( 'accessdefender_core_settings', array() );
+		$this->provider_settings = get_option( 'accessdefender_provider_settings', array() );
+		
+		// Load legacy options for backward compatibility and merge with new structure
+		$legacy_options = get_option( 'accessdefender_options', array() );
+		$this->options = array_merge( $this->core_settings, $this->provider_settings, $legacy_options );
+		
 		require_once ACCESS_DEFENDER_PATH . 'includes/Views/admin/settings-page.php';
 	}
 
@@ -75,6 +100,20 @@ class AdminPage {
 	 * @since 1.0.1
 	 */
 	public function init_settings(): void {
+		// Register new options structure
+		register_setting(
+			'accessdefender_options',
+			'accessdefender_core_settings',
+			array( $this, 'sanitize_core_settings' )
+		);
+		
+		register_setting(
+			'accessdefender_options',
+			'accessdefender_provider_settings',
+			array( $this, 'sanitize_provider_settings' )
+		);
+		
+		// Keep legacy registration for backward compatibility
 		register_setting(
 			'accessdefender_options',
 			'accessdefender_options',
@@ -247,7 +286,7 @@ class AdminPage {
 					   value="free" 
 					   <?php checked( $value, 'free' ); ?>
 					   class="provider-mode-radio">
-				<strong>Use Free Providers</strong> - Multiple free APIs with automatic rotation when limits hit
+				<strong>Use Free Providers</strong> - Multiple free APIs with sequential rotation when limits hit
 			</label>
 			<label style="display: block; margin-bottom: 15px;">
 				<input type="radio" 
@@ -258,7 +297,7 @@ class AdminPage {
 				<strong>Use Paid Provider</strong> - Single reliable paid API service
 			</label>
 		</div>
-		<p class="description">Choose your preferred detection method. Free providers rotate automatically when limits are reached.</p>
+		<p class="description">Choose your preferred detection method. The free endpoint is limited to 45 requests per minute. For higher usage, consider upgrading to a paid provider.</p>
 		<?php
 	}
 
@@ -294,9 +333,12 @@ class AdminPage {
 									   value="<?php echo esc_attr( $slug ); ?>"
 									   <?php checked( in_array( $slug, $value, true ) ); ?>
 									   style="margin-right: 8px;">
-								<h4><?php echo esc_html( $provider->get_name() ); ?>
-									<span class="provider-badge free">Free</span>
-								</h4>
+				<h4><?php echo esc_html( $provider->get_name() ); ?>
+					<span class="provider-badge free">Free</span>
+				</h4>
+				<p class="provider-limit-info">
+					<strong>Rate Limit:</strong> 45 requests per minute
+				</p>
 								<?php
 								$stats = $provider->get_usage_stats();
 								?>
@@ -341,34 +383,48 @@ class AdminPage {
 			<div class="access-defender-providers-grid">
 				<?php foreach ( $providers as $slug => $provider ) : ?>
 					<?php if ( ! $provider->is_free() ) : ?>
-						<div class="provider-card <?php echo $value === $slug ? 'selected' : ''; ?>">
-							<label style="cursor: pointer; display: block;">
+						<?php $is_proxycheck = ( $slug === 'proxycheck' ); ?>
+						<div class="provider-card <?php echo $value === $slug ? 'selected' : ''; ?> <?php echo $is_proxycheck ? '' : 'disabled'; ?>">
+							<label style="cursor: <?php echo $is_proxycheck ? 'pointer' : 'not-allowed'; ?>; display: block; opacity: <?php echo $is_proxycheck ? '1' : '0.6'; ?>;">
 								<input type="radio" 
 									   name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
 									   value="<?php echo esc_attr( $slug ); ?>"
 									   <?php checked( $value, $slug ); ?>
+									   <?php echo $is_proxycheck ? '' : 'disabled'; ?>
 									   style="margin-right: 8px;">
-								<h4><?php echo esc_html( $provider->get_name() ); ?>
-									<span class="provider-badge paid">Paid</span>
-								</h4>
-								<?php
-								$stats = $provider->get_usage_stats();
-								?>
-								<div class="provider-status provider-status-<?php echo esc_attr( $slug ); ?>">
-									<span class="status-indicator <?php echo $stats['success_rate'] > 80 ? 'healthy' : 'degraded'; ?>"></span>
-									<span class="provider-stats">
-										Used: <span class="usage-count"><?php echo number_format( $stats['monthly_usage'] ); ?></span> | 
-										Success: <span class="success-count"><?php echo number_format( $stats['total_success'] ); ?></span> | 
-										Failed: <span class="failed-count"><?php echo number_format( $stats['total_failed'] ); ?></span>
-									</span>
-								</div>
-							</label>
+				<h4><?php echo esc_html( $provider->get_name() ); ?>
+					<span class="provider-badge paid">Paid</span>
+				</h4>
+				<?php if ( method_exists( $provider, 'get_signup_url' ) ) : ?>
+					<p class="provider-signup-link">
+						<a href="<?php echo esc_url( $provider->get_signup_url() ); ?>" target="_blank" class="button button-secondary button-small">
+							Get API Key
+						</a>
+						<?php if ( $is_proxycheck ) : ?>
+							<span style="margin-left:8px; font-size:12px; color:#555;">Free signup includes 1,000 requests/day. Upgrade anytime.</span>
+						<?php else : ?>
+							<span style="margin-left:8px; font-size:12px; color:#a00;">Coming soon</span>
+						<?php endif; ?>
+					</p>
+				<?php endif; ?>
+							<?php
+							$stats = $provider->get_usage_stats();
+							?>
+							<div class="provider-status provider-status-<?php echo esc_attr( $slug ); ?>">
+								<span class="status-indicator <?php echo $stats['success_rate'] > 80 ? 'healthy' : 'degraded'; ?>"></span>
+								<span class="provider-stats">
+									Used: <span class="usage-count"><?php echo number_format( $stats['monthly_usage'] ); ?></span> | 
+									Success: <span class="success-count"><?php echo number_format( $stats['total_success'] ); ?></span> | 
+									Failed: <span class="failed-count"><?php echo number_format( $stats['total_failed'] ); ?></span>
+								</span>
+							</div>
+						</label>
 						</div>
 					<?php endif; ?>
 				<?php endforeach; ?>
 			</div>
 			<p class="description">
-				<strong>Dedicated Service:</strong> Use a single reliable paid provider with higher rate limits and better accuracy.
+				<strong>Dedicated Service:</strong> Use a single reliable paid provider with higher rate limits and better accuracy. ProxyCheck.io offers 1,000 requests/day on the free tier; upgrade for higher limits.
 			</p>
 		</div>
 		<?php
@@ -400,6 +456,11 @@ class AdminPage {
 						 data-provider="<?php echo esc_attr( $slug ); ?>">
 						<label style="font-weight: 600; display: block; margin-bottom: 5px;">
 							<?php echo esc_html( $provider->get_name() ); ?> API Key
+							<?php if ( method_exists( $provider, 'get_signup_url' ) ) : ?>
+								<a href="<?php echo esc_url( $provider->get_signup_url() ); ?>" target="_blank" class="button-link" style="margin-left: 10px; font-weight: normal;">
+									Get API Key
+								</a>
+							<?php endif; ?>
 						</label>
 						<input type="password" 
 							   name="accessdefender_options[<?php echo esc_attr( $field ); ?>][<?php echo esc_attr( $slug ); ?>]" 
@@ -413,15 +474,18 @@ class AdminPage {
 						?>
 						<p class="description">
 							Used: <?php echo number_format( $stats['monthly_usage'] ); ?> | Success: <?php echo number_format( $stats['total_success'] ); ?> | Failed: <?php echo number_format( $stats['total_failed'] ); ?>
-							<?php if ( ! empty( $value[ $slug ] ) ) : ?>
-								| <span id="status-<?php echo esc_attr( $slug ); ?>">Validating...</span>
-							<?php endif; ?>
+							| <a href="#" class="api-key-validate-link" data-provider="<?php echo esc_attr( $slug ); ?>">Validate</a>
+							<span id="status-<?php echo esc_attr( $slug ); ?>" style="margin-left:8px;"></span>
 						</p>
 					</div>
 				<?php endif; ?>
 			<?php endforeach; ?>
 			<div id="no-api-key-needed" style="<?php echo $provider_mode !== 'free' ? 'display: none;' : ''; ?>">
 				<p style="color: #46b450; font-weight: 600;">✓ No API keys required for free providers!</p>
+				<p style="color: #0073aa; font-size: 13px; margin-top: 10px;">
+					<strong>Note:</strong> The free endpoint is limited to 45 requests per minute. This is suitable for most small to medium websites. 
+					For high-traffic sites, consider using a paid provider for unlimited requests.
+				</p>
 			</div>
 		</div>
 		<?php
@@ -456,7 +520,28 @@ class AdminPage {
 			}
 		}
 		
-		// Set backward compatibility fields based on mode
+		// Validate required selections when VPN blocking enabled
+		if ( $sanitized['enable_vpn_blocking'] === '1' ) {
+			if ( $sanitized['provider_mode'] === 'free' ) {
+				if ( empty( $sanitized['free_providers'] ) ) {
+					$sanitized['free_providers'] = array( 'ip-api' );
+					if ( function_exists( 'add_settings_error' ) ) {
+						add_settings_error( 'accessdefender_options', 'accessdefender_no_free_providers', __( 'Please select at least one free provider. We selected IP-API for you.', 'access-defender' ), 'error' );
+					}
+				}
+			} else {
+				if ( empty( $sanitized['paid_provider'] ) ) {
+					// Fallback to free provider when paid not selected
+					$sanitized['provider_mode']  = 'free';
+					$sanitized['free_providers'] = array( 'ip-api' );
+					if ( function_exists( 'add_settings_error' ) ) {
+						add_settings_error( 'accessdefender_options', 'accessdefender_no_paid_provider', __( 'Please select an active paid provider and provide a valid API key. Falling back to free provider.', 'access-defender' ), 'error' );
+					}
+				}
+			}
+		}
+
+		// Set backward compatibility fields based on (possibly adjusted) mode
 		if ( $sanitized['provider_mode'] === 'free' ) {
 			$sanitized['primary_provider'] = 'ip-api';
 			$sanitized['active_providers'] = $sanitized['free_providers'];
@@ -465,6 +550,89 @@ class AdminPage {
 			$sanitized['active_providers'] = array( $sanitized['paid_provider'] );
 		}
 		
+		return $sanitized;
+	}
+
+	/**
+	 * Sanitize core settings
+	 *
+	 * @param array $input Input values to sanitize.
+	 * @return array Sanitized values.
+	 * @since 1.1.0
+	 */
+	public function sanitize_core_settings( $input ): array {
+		$sanitized = array();
+
+		if ( isset( $input['enable_vpn_blocking'] ) ) {
+			$sanitized['enable_vpn_blocking'] = sanitize_text_field( $input['enable_vpn_blocking'] );
+		}
+
+		if ( isset( $input['warning_title'] ) ) {
+			$sanitized['warning_title'] = sanitize_text_field( $input['warning_title'] );
+		}
+
+		if ( isset( $input['warning_message'] ) ) {
+			$sanitized['warning_message'] = wp_kses_post( $input['warning_message'] );
+		}
+
+		if ( isset( $input['version'] ) ) {
+			$sanitized['version'] = sanitize_text_field( $input['version'] );
+		}
+
+		if ( isset( $input['installed_date'] ) ) {
+			$sanitized['installed_date'] = sanitize_text_field( $input['installed_date'] );
+		}
+
+		return $sanitized;
+	}
+
+	/**
+	 * Sanitize provider settings
+	 *
+	 * @param array $input Input values to sanitize.
+	 * @return array Sanitized values.
+	 * @since 1.1.0
+	 */
+	public function sanitize_provider_settings( $input ): array {
+		$sanitized = array();
+
+		if ( isset( $input['provider_mode'] ) ) {
+			$sanitized['provider_mode'] = in_array( $input['provider_mode'], array( 'free', 'paid' ), true )
+				? $input['provider_mode'] : 'free';
+		}
+
+		if ( isset( $input['free_providers'] ) && is_array( $input['free_providers'] ) ) {
+			$valid_providers = array( 'ip-api' );
+			$sanitized['free_providers'] = array_filter(
+				array_map( 'sanitize_text_field', $input['free_providers'] ),
+				function( $provider ) use ( $valid_providers ) {
+					return in_array( $provider, $valid_providers, true );
+				}
+			);
+		}
+
+		if ( isset( $input['paid_provider'] ) ) {
+			// Temporarily restrict to proxycheck only (others coming soon)
+			$valid_paid_providers = array( 'proxycheck' );
+			$sanitized['paid_provider'] = in_array( $input['paid_provider'], $valid_paid_providers, true )
+				? $input['paid_provider'] : 'proxycheck';
+		}
+
+		if ( isset( $input['primary_provider'] ) ) {
+			$sanitized['primary_provider'] = sanitize_text_field( $input['primary_provider'] );
+		}
+
+		if ( isset( $input['active_providers'] ) && is_array( $input['active_providers'] ) ) {
+			$sanitized['active_providers'] = array_map( 'sanitize_text_field', $input['active_providers'] );
+		}
+
+		if ( isset( $input['api_keys'] ) && is_array( $input['api_keys'] ) ) {
+			$sanitized['api_keys'] = array();
+			foreach ( $input['api_keys'] as $provider => $key ) {
+				$sanitized['api_keys'][ sanitize_text_field( $provider ) ] = sanitize_text_field( $key );
+			}
+		}
+
 		return $sanitized;
 	}
 }

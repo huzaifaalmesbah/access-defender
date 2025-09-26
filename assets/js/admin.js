@@ -99,11 +99,12 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // API Key validation for v1.1.0
-    $(document).on('blur', '.api-key-input', function() {
-        var $input = $(this);
+    // API Key validation - only on link click
+    $(document).on('click', '.api-key-validate-link', function(e) {
+        e.preventDefault();
+        var provider = $(this).data('provider');
+        var $input = $('.api-key-' + provider + ' .api-key-input');
         var apiKey = $input.val().trim();
-        var provider = $input.data('provider');
         var $status = $('#status-' + provider);
 
         if (apiKey === '') {
@@ -113,7 +114,6 @@ jQuery(document).ready(function($) {
 
         $status.text('Validating...').css('color', '#666');
 
-        // Make AJAX request to validate API key
         $.ajax({
             url: accessdefender_admin.ajaxurl,
             type: 'POST',
@@ -124,7 +124,7 @@ jQuery(document).ready(function($) {
                 nonce: accessdefender_admin.nonce
             },
             success: function(response) {
-                if (response.success && response.data) {
+                if (response.success && response.data === true) {
                     $status.text('✓ Valid').css('color', '#46b450');
                 } else {
                     $status.text('✗ Invalid').css('color', '#dc3232');
@@ -151,9 +151,15 @@ jQuery(document).ready(function($) {
                 nonce: accessdefender_admin.nonce
             },
             success: function(response) {
-                if (response.success) {
+                if (response.success && response.data) {
+                    console.log('Provider status data:', response.data); // Debug log
                     updateProviderStatus(response.data);
+                } else {
+                    console.log('Invalid provider status response:', response);
                 }
+            },
+            error: function(xhr, status, error) {
+                console.log('Failed to load provider status:', error);
             }
         });
     }
@@ -161,12 +167,16 @@ jQuery(document).ready(function($) {
     function updateProviderStatus(data) {
         $.each(data, function(provider, status) {
             var $statusElement = $('.provider-status-' + provider);
+            
+            // Update status indicator
             $statusElement.find('.status-indicator')
                 .removeClass('healthy degraded error')
-                .addClass(status.status);
-            $statusElement.find('.usage-count').text(status.monthly_usage);
-            $statusElement.find('.success-count').text(status.total_success);
-            $statusElement.find('.failed-count').text(status.total_failed);
+                .addClass(status.status || 'degraded');
+            
+            // Update statistics with fallback values
+            $statusElement.find('.usage-count').text(status.monthly_usage || 0);
+            $statusElement.find('.success-count').text(status.total_success || 0);
+            $statusElement.find('.failed-count').text(status.total_failed || 0);
         });
     }
 

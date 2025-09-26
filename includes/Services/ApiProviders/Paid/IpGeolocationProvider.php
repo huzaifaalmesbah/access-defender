@@ -1,29 +1,32 @@
 <?php
 /**
- * IPInfo.io Provider
+ * IPGeolocation.io Provider
  *
- * Paid IP geolocation API provider with VPN/Proxy detection
+ * Paid IP geolocation API provider with security features
  *
  * @package AccessDefender
  * @subpackage Services\ApiProviders
  * @since 1.1.0
  */
 
-namespace AccessDefender\Services\ApiProviders;
+namespace AccessDefender\Services\ApiProviders\Paid;
+
+use AccessDefender\Interfaces\ApiProviderInterface;
+use AccessDefender\Services\ApiProviders\BaseProvider;
 
 /**
- * IpInfoProvider Class
+ * IpGeolocationProvider Class
  *
- * Handles IP detection using ipinfo.io service
+ * Handles IP detection using ipgeolocation.io service
  */
-class IpInfoProvider extends BaseProvider {
+class IpGeolocationProvider extends BaseProvider {
 
 	/**
 	 * API endpoint URL
 	 *
 	 * @var string
 	 */
-	private $api_url = 'https://ipinfo.io/';
+	private $api_url = 'https://api.ipgeolocation.io/ipgeo';
 
 	/**
 	 * Get provider name
@@ -31,7 +34,7 @@ class IpInfoProvider extends BaseProvider {
 	 * @return string Provider name
 	 */
 	public function get_name(): string {
-		return 'IPInfo.io';
+		return 'IPGeolocation.io';
 	}
 
 	/**
@@ -40,7 +43,7 @@ class IpInfoProvider extends BaseProvider {
 	 * @return string Provider slug
 	 */
 	public function get_slug(): string {
-		return 'ipinfo';
+		return 'ipgeolocation';
 	}
 
 	/**
@@ -58,7 +61,7 @@ class IpInfoProvider extends BaseProvider {
 	 * @return int Rate limit
 	 */
 	public function get_rate_limit(): int {
-		return 50000; // 50k requests per month for basic paid plan
+		return 30000; // 30k requests per month for basic paid plan
 	}
 
 	/**
@@ -81,7 +84,7 @@ class IpInfoProvider extends BaseProvider {
 			return false;
 		}
 
-		$test_response = $this->make_request( $this->api_url . '8.8.8.8/json?token=' . $api_key );
+		$test_response = $this->make_request( $this->api_url . '?apiKey=' . $api_key . '&ip=8.8.8.8' );
 		return $test_response['success'] && isset( $test_response['data']['ip'] );
 	}
 
@@ -103,7 +106,7 @@ class IpInfoProvider extends BaseProvider {
 			return $cached;
 		}
 
-		$url = $this->api_url . $ip . '/json?token=' . $api_key;
+		$url = $this->api_url . '?apiKey=' . $api_key . '&ip=' . $ip . '&fields=geo,security';
 
 		$response = $this->make_request( $url );
 
@@ -115,35 +118,33 @@ class IpInfoProvider extends BaseProvider {
 		$data = $response['data'];
 
 		// Check for error in response
-		if ( isset( $data['error'] ) ) {
+		if ( isset( $data['message'] ) && strpos( $data['message'], 'Invalid' ) !== false ) {
 			$this->log_usage( false );
 			return false;
 		}
 
-		// Parse location
-		$location_parts = explode( ',', $data['loc'] ?? '' );
-		$latitude       = isset( $location_parts[0] ) ? (float) trim( $location_parts[0] ) : null;
-		$longitude      = isset( $location_parts[1] ) ? (float) trim( $location_parts[1] ) : null;
-
-		// Check for VPN/Proxy indicators
-		$is_proxy   = isset( $data['privacy']['proxy'] ) ? $data['privacy']['proxy'] : false;
-		$is_hosting = isset( $data['privacy']['hosting'] ) ? $data['privacy']['hosting'] : false;
-		$is_vpn     = isset( $data['privacy']['vpn'] ) ? $data['privacy']['vpn'] : false;
+		// Parse security information
+		$is_proxy = false;
+		$is_vpn   = false;
+		if ( isset( $data['security'] ) ) {
+			$is_proxy = ! empty( $data['security']['is_proxy'] );
+			$is_vpn   = ! empty( $data['security']['is_vpn'] );
+		}
 
 		$result = array(
 			'ip'           => $data['ip'] ?? $ip,
-			'country'      => $data['country_name'] ?? ( $data['country'] ?? '' ),
-			'country_code' => $data['country'] ?? '',
-			'region'       => $data['region'] ?? '',
+			'country'      => $data['country_name'] ?? '',
+			'country_code' => $data['country_code2'] ?? '',
+			'region'       => $data['state_prov'] ?? '',
 			'city'         => $data['city'] ?? '',
-			'latitude'     => $latitude,
-			'longitude'    => $longitude,
-			'timezone'     => $data['timezone'] ?? '',
-			'isp'          => $data['org'] ?? '',
-			'organization' => $data['org'] ?? '',
+			'latitude'     => isset( $data['latitude'] ) ? (float) $data['latitude'] : null,
+			'longitude'    => isset( $data['longitude'] ) ? (float) $data['longitude'] : null,
+			'timezone'     => $data['time_zone']['name'] ?? '',
+			'isp'          => $data['isp'] ?? '',
+			'organization' => $data['organization'] ?? '',
 			'as_number'    => '',
 			'is_proxy'     => $is_proxy || $is_vpn,
-			'is_hosting'   => $is_hosting,
+			'is_hosting'   => false, // Not provided by this API
 			'provider'     => $this->get_slug(),
 		);
 
@@ -160,7 +161,7 @@ class IpInfoProvider extends BaseProvider {
 	 * @return bool True if VPN/Proxy detected
 	 */
 	public function is_vpn_proxy( array $ip_info ): bool {
-		return ! empty( $ip_info['is_proxy'] ) || ! empty( $ip_info['is_hosting'] );
+		return ! empty( $ip_info['is_proxy'] );
 	}
 
 	/**
@@ -175,4 +176,14 @@ class IpInfoProvider extends BaseProvider {
 			'name' => $ip_info['country'] ?? '',
 		);
 	}
+
+	/**
+	 * Get signup URL for API key
+	 *
+	 * @return string Signup URL
+	 */
+	public function get_signup_url(): string {
+		return 'https://ipgeolocation.io/signup.html';
+	}
+
 }
