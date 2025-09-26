@@ -3,10 +3,11 @@
  * VpnDetector class
  *
  * This class is responsible for detecting if an IP address is using a VPN or proxy.
- * It uses the ip-api.com API to verify the IP address information and determine
- * if the IP belongs to a VPN or proxy service.
+ * It now uses multiple API providers with fallback support for improved reliability.
  *
  * @package AccessDefender\Services
+ * @since 1.0.0
+ * @updated 1.1.0 - Added multiple API provider support
  */
 
 namespace AccessDefender\Services;
@@ -17,6 +18,7 @@ namespace AccessDefender\Services;
  * @package AccessDefender\Services
  *
  * @property IpDetector $ip_detector IP detector service
+ * @property ApiProviderManager $api_manager API provider manager
  */
 class VpnDetector {
 
@@ -28,12 +30,20 @@ class VpnDetector {
 	private IpDetector $ip_detector;
 
 	/**
+	 * API provider manager instance.
+	 *
+	 * @var ApiProviderManager
+	 */
+	private ApiProviderManager $api_manager;
+
+	/**
 	 * Constructor
 	 *
 	 * @param IpDetector $ip_detector IP detector service.
 	 */
 	public function __construct( IpDetector $ip_detector ) {
 		$this->ip_detector = $ip_detector;
+		$this->api_manager = new ApiProviderManager();
 	}
 
 	/**
@@ -48,17 +58,51 @@ class VpnDetector {
 			return false;
 		}
 
-		$response = wp_remote_get(
-			"http://ip-api.com/json/{$ip}?fields=proxy,hosting",
-			array( 'timeout' => 5 )
-		);
+		return $this->api_manager->is_vpn_proxy( $ip );
+	}
 
-		if ( is_wp_error( $response ) ) {
+	/**
+	 * Get country information for the current IP
+	 *
+	 * @return array Country information (code, name)
+	 * @since 1.1.0
+	 */
+	public function get_country_info(): array {
+		$ip = $this->ip_detector->get_client_ip();
+
+		if ( empty( $ip ) || $this->ip_detector->is_private_ip( $ip ) ) {
+			return array(
+				'code' => '',
+				'name' => '',
+			);
+		}
+
+		return $this->api_manager->get_country_info( $ip );
+	}
+
+	/**
+	 * Get full IP information for the current IP
+	 *
+	 * @return array|false Full IP information or false on failure
+	 * @since 1.1.0
+	 */
+	public function get_ip_info() {
+		$ip = $this->ip_detector->get_client_ip();
+
+		if ( empty( $ip ) || $this->ip_detector->is_private_ip( $ip ) ) {
 			return false;
 		}
 
-		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+		return $this->api_manager->get_ip_info( $ip );
+	}
 
-		return ( ! empty( $data['proxy'] ) || ! empty( $data['hosting'] ) );
+	/**
+	 * Get API provider manager instance
+	 *
+	 * @return ApiProviderManager API provider manager
+	 * @since 1.1.0
+	 */
+	public function get_api_manager(): ApiProviderManager {
+		return $this->api_manager;
 	}
 }

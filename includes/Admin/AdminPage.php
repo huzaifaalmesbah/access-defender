@@ -103,6 +103,7 @@ class AdminPage {
 	 * 'access-defender' settings page.
 	 *
 	 * @since 1.0.1
+	 * @updated 1.1.0 - Added API provider settings
 	 */
 	private function add_settings_fields(): void {
 		add_settings_field(
@@ -112,6 +113,42 @@ class AdminPage {
 			'access-defender',
 			'main_section',
 			array( 'enable_vpn_blocking' )
+		);
+
+		add_settings_field(
+			'provider_mode',
+			'Provider Configuration',
+			array( $this, 'render_provider_mode_field' ),
+			'access-defender',
+			'main_section',
+			array( 'provider_mode' )
+		);
+
+		add_settings_field(
+			'free_providers',
+			'<span class="free-providers-header" style="display: none;">Free Providers (Auto-Rotation)</span>',
+			array( $this, 'render_free_providers_field' ),
+			'access-defender',
+			'main_section',
+			array( 'free_providers' )
+		);
+
+		add_settings_field(
+			'paid_provider',
+			'<span class="paid-providers-header" style="display: none;">Paid Provider Selection</span>',
+			array( $this, 'render_paid_provider_field' ),
+			'access-defender',
+			'main_section',
+			array( 'paid_provider' )
+		);
+
+		add_settings_field(
+			'api_keys',
+			'API Keys',
+			array( $this, 'render_dynamic_api_keys_field' ),
+			'access-defender',
+			'main_section',
+			array( 'api_keys' )
 		);
 
 		add_settings_field(
@@ -193,6 +230,204 @@ class AdminPage {
 	}
 
 	/**
+	 * Render provider mode selection field
+	 *
+	 * @param array $args Field arguments.
+	 * @return void
+	 * @since 1.1.0
+	 */
+	public function render_provider_mode_field( $args ): void {
+		$field = $args[0];
+		$value = $this->options[ $field ] ?? 'free';
+		?>
+		<div class="provider-mode-selection">
+			<label style="display: block; margin-bottom: 15px;">
+				<input type="radio" 
+					   name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
+					   value="free" 
+					   <?php checked( $value, 'free' ); ?>
+					   class="provider-mode-radio">
+				<strong>Use Free Providers</strong> - Multiple free APIs with automatic rotation when limits hit
+			</label>
+			<label style="display: block; margin-bottom: 15px;">
+				<input type="radio" 
+					   name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
+					   value="paid" 
+					   <?php checked( $value, 'paid' ); ?>
+					   class="provider-mode-radio">
+				<strong>Use Paid Provider</strong> - Single reliable paid API service
+			</label>
+		</div>
+		<p class="description">Choose your preferred detection method. Free providers rotate automatically when limits are reached.</p>
+		<?php
+	}
+
+	/**
+	 * Render free providers selection field
+	 *
+	 * @param array $args Field arguments.
+	 * @return void
+	 * @since 1.1.0
+	 */
+	public function render_free_providers_field( $args ): void {
+		$field = $args[0];
+		$value = $this->options[ $field ] ?? array( 'ip-api' );
+		
+		if ( ! is_array( $value ) ) {
+			$value = array( $value );
+		}
+		
+		// Get API provider manager to list providers
+		$provider_manager = new \AccessDefender\Services\ApiProviderManager();
+		$providers = $provider_manager->get_all_providers();
+		
+		$provider_mode = $this->options['provider_mode'] ?? 'free';
+		?>
+		<div class="free-providers-section" style="<?php echo $provider_mode !== 'free' ? 'display: none;' : ''; ?>">
+			<div class="access-defender-providers-grid">
+				<?php foreach ( $providers as $slug => $provider ) : ?>
+					<?php if ( $provider->is_free() ) : ?>
+						<div class="provider-card <?php echo in_array( $slug, $value, true ) ? 'selected' : ''; ?>">
+							<label style="cursor: pointer; display: block;">
+								<input type="checkbox" 
+									   name="accessdefender_options[<?php echo esc_attr( $field ); ?>][]" 
+									   value="<?php echo esc_attr( $slug ); ?>"
+									   <?php checked( in_array( $slug, $value, true ) ); ?>
+									   style="margin-right: 8px;">
+								<h4><?php echo esc_html( $provider->get_name() ); ?>
+									<span class="provider-badge free">Free</span>
+								</h4>
+								<?php
+								$stats = $provider->get_usage_stats();
+								?>
+								<div class="provider-status provider-status-<?php echo esc_attr( $slug ); ?>">
+									<span class="status-indicator <?php echo $stats['success_rate'] > 80 ? 'healthy' : 'degraded'; ?>"></span>
+									<span class="provider-stats">
+										Used: <span class="usage-count"><?php echo number_format( $stats['monthly_usage'] ); ?></span> | 
+										Success: <span class="success-count"><?php echo number_format( $stats['total_success'] ); ?></span> | 
+										Failed: <span class="failed-count"><?php echo number_format( $stats['total_failed'] ); ?></span>
+									</span>
+								</div>
+							</label>
+						</div>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</div>
+			<p class="description">
+				<strong>Smart Rotation:</strong> When one provider hits its monthly limit, the system automatically switches to the next available provider. Select multiple providers for maximum reliability.
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render paid provider selection field
+	 *
+	 * @param array $args Field arguments.
+	 * @return void
+	 * @since 1.1.0
+	 */
+	public function render_paid_provider_field( $args ): void {
+		$field = $args[0];
+		$value = $this->options[ $field ] ?? '';
+		
+		// Get API provider manager to list providers
+		$provider_manager = new \AccessDefender\Services\ApiProviderManager();
+		$providers = $provider_manager->get_all_providers();
+		
+		$provider_mode = $this->options['provider_mode'] ?? 'free';
+		?>
+		<div class="paid-providers-section" style="<?php echo $provider_mode !== 'paid' ? 'display: none;' : ''; ?>">
+			<div class="access-defender-providers-grid">
+				<?php foreach ( $providers as $slug => $provider ) : ?>
+					<?php if ( ! $provider->is_free() ) : ?>
+						<div class="provider-card <?php echo $value === $slug ? 'selected' : ''; ?>">
+							<label style="cursor: pointer; display: block;">
+								<input type="radio" 
+									   name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
+									   value="<?php echo esc_attr( $slug ); ?>"
+									   <?php checked( $value, $slug ); ?>
+									   style="margin-right: 8px;">
+								<h4><?php echo esc_html( $provider->get_name() ); ?>
+									<span class="provider-badge paid">Paid</span>
+								</h4>
+								<?php
+								$stats = $provider->get_usage_stats();
+								?>
+								<div class="provider-status provider-status-<?php echo esc_attr( $slug ); ?>">
+									<span class="status-indicator <?php echo $stats['success_rate'] > 80 ? 'healthy' : 'degraded'; ?>"></span>
+									<span class="provider-stats">
+										Used: <span class="usage-count"><?php echo number_format( $stats['monthly_usage'] ); ?></span> | 
+										Success: <span class="success-count"><?php echo number_format( $stats['total_success'] ); ?></span> | 
+										Failed: <span class="failed-count"><?php echo number_format( $stats['total_failed'] ); ?></span>
+									</span>
+								</div>
+							</label>
+						</div>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</div>
+			<p class="description">
+				<strong>Dedicated Service:</strong> Use a single reliable paid provider with higher rate limits and better accuracy.
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render dynamic API keys field (shows only for selected providers)
+	 *
+	 * @param array $args Field arguments.
+	 * @return void
+	 * @since 1.1.0
+	 */
+	public function render_dynamic_api_keys_field( $args ): void {
+		$field = $args[0];
+		$value = $this->options[ $field ] ?? array();
+		
+		// Get API provider manager to list providers
+		$provider_manager = new \AccessDefender\Services\ApiProviderManager();
+		$providers = $provider_manager->get_all_providers();
+		
+		$provider_mode = $this->options['provider_mode'] ?? 'free';
+		$paid_provider = $this->options['paid_provider'] ?? '';
+		?>
+		<div class="api-keys-section" id="dynamic-api-keys">
+			<?php foreach ( $providers as $slug => $provider ) : ?>
+				<?php if ( $provider->requires_api_key() ) : ?>
+					<div class="api-key-field api-key-<?php echo esc_attr( $slug ); ?>" 
+						 style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; display: none;"
+						 data-provider="<?php echo esc_attr( $slug ); ?>">
+						<label style="font-weight: 600; display: block; margin-bottom: 5px;">
+							<?php echo esc_html( $provider->get_name() ); ?> API Key
+						</label>
+						<input type="password" 
+							   name="accessdefender_options[<?php echo esc_attr( $field ); ?>][<?php echo esc_attr( $slug ); ?>]" 
+							   value="<?php echo esc_attr( $value[ $slug ] ?? '' ); ?>" 
+							   class="regular-text api-key-input" 
+							   style="width: 100%;"
+							   data-provider="<?php echo esc_attr( $slug ); ?>"
+							   placeholder="Enter your <?php echo esc_attr( $provider->get_name() ); ?> API key">
+						<?php
+						$stats = $provider->get_usage_stats();
+						?>
+						<p class="description">
+							Used: <?php echo number_format( $stats['monthly_usage'] ); ?> | Success: <?php echo number_format( $stats['total_success'] ); ?> | Failed: <?php echo number_format( $stats['total_failed'] ); ?>
+							<?php if ( ! empty( $value[ $slug ] ) ) : ?>
+								| <span id="status-<?php echo esc_attr( $slug ); ?>">Validating...</span>
+							<?php endif; ?>
+						</p>
+					</div>
+				<?php endif; ?>
+			<?php endforeach; ?>
+			<div id="no-api-key-needed" style="<?php echo $provider_mode !== 'free' ? 'display: none;' : ''; ?>">
+				<p style="color: #46b450; font-weight: 600;">✓ No API keys required for free providers!</p>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Sanitizes the Access Defender plugin options.
 	 *
 	 * The function filters the input options array to ensure that only the
@@ -202,12 +437,34 @@ class AdminPage {
 	 * @param array $input The options input array.
 	 *
 	 * @return array The sanitized options array.
+	 * @updated 1.1.0 - Added API provider options sanitization
 	 */
 	public function sanitize_options( $input ): array {
 		$sanitized                        = array();
 		$sanitized['enable_vpn_blocking'] = isset( $input['enable_vpn_blocking'] ) ? '1' : '0';
+		$sanitized['provider_mode']       = sanitize_text_field( $input['provider_mode'] ?? 'free' );
+		$sanitized['free_providers']      = isset( $input['free_providers'] ) ? array_map( 'sanitize_text_field', $input['free_providers'] ) : array( 'ip-api' );
+		$sanitized['paid_provider']       = sanitize_text_field( $input['paid_provider'] ?? '' );
 		$sanitized['warning_title']       = sanitize_text_field( $input['warning_title'] ?? '' );
 		$sanitized['warning_message']     = wp_kses_post( $input['warning_message'] ?? '' );
+		
+		// Sanitize API keys
+		$sanitized['api_keys'] = array();
+		if ( isset( $input['api_keys'] ) && is_array( $input['api_keys'] ) ) {
+			foreach ( $input['api_keys'] as $provider => $key ) {
+				$sanitized['api_keys'][ sanitize_text_field( $provider ) ] = sanitize_text_field( $key );
+			}
+		}
+		
+		// Set backward compatibility fields based on mode
+		if ( $sanitized['provider_mode'] === 'free' ) {
+			$sanitized['primary_provider'] = 'ip-api';
+			$sanitized['active_providers'] = $sanitized['free_providers'];
+		} else {
+			$sanitized['primary_provider'] = $sanitized['paid_provider'];
+			$sanitized['active_providers'] = array( $sanitized['paid_provider'] );
+		}
+		
 		return $sanitized;
 	}
 }

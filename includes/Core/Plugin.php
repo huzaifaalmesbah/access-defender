@@ -9,6 +9,7 @@
 namespace AccessDefender\Core;
 
 use AccessDefender\Admin\AdminPage;
+use AccessDefender\Services\ApiProviderManager;
 use AccessDefender\Services\BotDetector;
 use AccessDefender\Services\IpDetector;
 use AccessDefender\Services\VpnDetector;
@@ -90,6 +91,10 @@ class Plugin implements PluginInterface {
 	private function init_hooks(): void {
 		add_action( 'wp', array( $this, 'check_access' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
+		
+		// AJAX handlers for v1.1.0
+		add_action( 'wp_ajax_accessdefender_validate_api_key', array( $this, 'ajax_validate_api_key' ) );
+		add_action( 'wp_ajax_accessdefender_provider_status', array( $this, 'ajax_provider_status' ) );
 	}
 
 	/**
@@ -171,5 +176,64 @@ class Plugin implements PluginInterface {
 			ACCESS_DEFENDER_VERSION,
 			true
 		);
+
+		// Localize script with AJAX nonce for v1.1.0
+		wp_localize_script(
+			'access-defender-admin',
+			'accessdefender_admin',
+			array(
+				'nonce' => wp_create_nonce( 'accessdefender_admin_nonce' ),
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+			)
+		);
+	}
+
+	/**
+	 * AJAX handler for API key validation
+	 *
+	 * @return void
+	 * @since 1.1.0
+	 */
+	public function ajax_validate_api_key(): void {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'accessdefender_admin_nonce' ) ) {
+			wp_die( 'Invalid nonce' );
+		}
+
+		// Check user capability
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		$provider = sanitize_text_field( $_POST['provider'] ?? '' );
+		$api_key  = sanitize_text_field( $_POST['api_key'] ?? '' );
+
+		$api_manager = new ApiProviderManager();
+		$is_valid    = $api_manager->validate_api_key( $provider, $api_key );
+
+		wp_send_json_success( $is_valid );
+	}
+
+	/**
+	 * AJAX handler for provider status
+	 *
+	 * @return void
+	 * @since 1.1.0
+	 */
+	public function ajax_provider_status(): void {
+		// Verify nonce
+		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'accessdefender_admin_nonce' ) ) {
+			wp_die( 'Invalid nonce' );
+		}
+
+		// Check user capability
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		$api_manager = new ApiProviderManager();
+		$status      = $api_manager->get_providers_status();
+
+		wp_send_json_success( $status );
 	}
 }

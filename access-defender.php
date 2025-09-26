@@ -23,6 +23,23 @@ define( 'ACCESS_DEFENDER_URL', plugin_dir_url( __FILE__ ) );
 // Load Composer autoloader.
 require_once ACCESS_DEFENDER_PATH . 'vendor/autoload.php';
 
+// Load our custom autoloader for new v1.1.0 classes
+spl_autoload_register( function ( $class ) {
+	// Only handle AccessDefender namespace
+	if ( strpos( $class, 'AccessDefender\\' ) !== 0 ) {
+		return;
+	}
+
+	// Convert namespace to file path
+	$class_file = str_replace( 'AccessDefender\\', '', $class );
+	$class_file = str_replace( '\\', '/', $class_file );
+	$file_path  = ACCESS_DEFENDER_PATH . 'includes/' . $class_file . '.php';
+
+	if ( file_exists( $file_path ) ) {
+		require_once $file_path;
+	}
+} );
+
 // Register activation, deactivation, and uninstall hooks.
 register_activation_hook( __FILE__, array( 'AccessDefender\Core\ActivationHooks', 'activate' ) );
 register_deactivation_hook( __FILE__, array( 'AccessDefender\Core\ActivationHooks', 'deactivate' ) );
