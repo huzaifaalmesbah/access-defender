@@ -83,6 +83,17 @@ class AdminPage {
 		$this->core_settings     = get_option( 'accessdefender_core_settings', array() );
 		$this->provider_settings = get_option( 'accessdefender_provider_settings', array() );
 		
+		// If migration to new structured options is complete, remove legacy option to avoid confusion
+		$legacy_exists = get_option( 'accessdefender_options', null );
+		if ( null !== $legacy_exists ) {
+			$has_core     = is_array( $this->core_settings ) && ! empty( $this->core_settings );
+			$has_provider = is_array( $this->provider_settings ) && ! empty( $this->provider_settings );
+			if ( $has_core && $has_provider ) {
+				// Safe to remove legacy option now that both new buckets exist
+				delete_option( 'accessdefender_options' );
+			}
+		}
+		
 		// Load legacy options for backward compatibility and merge with new structure
 		$legacy_options = get_option( 'accessdefender_options', array() );
 		$this->options = array_merge( $this->core_settings, $this->provider_settings, $legacy_options );
@@ -577,6 +588,27 @@ class AdminPage {
 			$sanitized['active_providers'] = array( $sanitized['paid_provider'] );
 		}
 		
+		// Persist to new structured options as well for v1.1.0+
+		$core_settings = array(
+			'enable_vpn_blocking' => $sanitized['enable_vpn_blocking'] ?? '0',
+			'warning_title'       => $sanitized['warning_title'] ?? '',
+			'warning_message'     => $sanitized['warning_message'] ?? '',
+		);
+
+		$provider_settings = array(
+			'provider_mode'    => $sanitized['provider_mode'] ?? 'free',
+			'free_providers'   => $sanitized['free_providers'] ?? array( 'ip-api' ),
+			'paid_provider'    => $sanitized['paid_provider'] ?? '',
+			'primary_provider' => $sanitized['primary_provider'] ?? ( ( $sanitized['provider_mode'] ?? 'free' ) === 'free' ? 'ip-api' : ( $sanitized['paid_provider'] ?? '' ) ),
+			'active_providers' => $sanitized['active_providers'] ?? ( ( $sanitized['provider_mode'] ?? 'free' ) === 'free' ? ( $sanitized['free_providers'] ?? array( 'ip-api' ) ) : ( isset( $sanitized['paid_provider'] ) ? array( $sanitized['paid_provider'] ) : array() ) ),
+			'api_keys'         => $sanitized['api_keys'] ?? array(),
+		);
+
+		// Update both new option buckets to keep them in sync
+		update_option( 'accessdefender_core_settings', $core_settings );
+		update_option( 'accessdefender_provider_settings', $provider_settings );
+
+		// Return legacy combined array for backward compatibility
 		return $sanitized;
 	}
 

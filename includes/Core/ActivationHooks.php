@@ -130,9 +130,16 @@ class ActivationHooks {
 			}
 			update_option( 'accessdefender_provider_settings', $provider_settings );
 
-			// Keep legacy option for backward compatibility, but mark as migrated
-			$legacy_options['_migrated_to_v1_1'] = true;
-			update_option( 'accessdefender_options', $legacy_options );
+			// If both new buckets have content, remove legacy option to complete migration
+			$core_done     = get_option( 'accessdefender_core_settings', array() );
+			$provider_done = get_option( 'accessdefender_provider_settings', array() );
+			if ( is_array( $core_done ) && ! empty( $core_done ) && is_array( $provider_done ) && ! empty( $provider_done ) ) {
+				delete_option( 'accessdefender_options' );
+			} else {
+				// Otherwise keep legacy and mark as partially migrated
+				$legacy_options['_migrated_to_v1_1'] = true;
+				update_option( 'accessdefender_options', $legacy_options );
+			}
 		}
 	}
 

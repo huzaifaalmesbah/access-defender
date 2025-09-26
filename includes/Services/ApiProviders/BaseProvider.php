@@ -143,10 +143,13 @@ abstract class BaseProvider implements ApiProviderInterface {
 		update_option( $usage_key, $usage );
 
 		// Per-minute usage tracking for rate limiting
-		$minute_key = $this->cache_prefix . 'minute_' . $this->get_slug() . '_' . date( 'Y-m-d-H-i' );
-		$minute_usage = get_option( $minute_key, 0 );
-		$minute_usage++;
-		update_option( $minute_key, $minute_usage, 120 ); // Expire after 2 minutes
+		// Only track minute-level counters for free providers (e.g., IP-API free)
+		if ( method_exists( $this, 'is_free' ) && $this->is_free() ) {
+			$minute_key   = $this->cache_prefix . 'minute_' . $this->get_slug() . '_' . date( 'Y-m-d-H-i' );
+			$minute_usage = get_option( $minute_key, 0 );
+			$minute_usage++;
+			update_option( $minute_key, $minute_usage, 120 ); // Expire after 2 minutes
+		}
 
 		// Log success/failure rate
 		$stats_key = $this->cache_prefix . 'stats_' . $this->get_slug();
@@ -190,13 +193,17 @@ abstract class BaseProvider implements ApiProviderInterface {
 	 * @return bool True if rate limited
 	 */
 	public function is_minute_rate_limited(): bool {
+		// Minute rate limiting applies only to free providers
+		if ( ! ( method_exists( $this, 'is_free' ) && $this->is_free() ) ) {
+			return false;
+		}
+
 		$minute_limit = $this->get_minute_rate_limit();
-		
 		if ( $minute_limit === 0 ) {
 			return false; // No limit
 		}
 
-		$minute_key = $this->cache_prefix . 'minute_' . $this->get_slug() . '_' . date( 'Y-m-d-H-i' );
+		$minute_key   = $this->cache_prefix . 'minute_' . $this->get_slug() . '_' . date( 'Y-m-d-H-i' );
 		$minute_usage = get_option( $minute_key, 0 );
 
 		return $minute_usage >= $minute_limit;
