@@ -54,19 +54,14 @@ jQuery(document).ready(function($) {
         if ($(this).attr('type') === 'radio') {
             $('.paid-providers-section .provider-card').removeClass('selected');
             $card.addClass('selected');
-            // Add small delay to ensure selection is processed
-            setTimeout(function() {
-                updateApiKeyFields();
-            }, 100);
+            updateApiKeyFields();
         }
     });
 
     // Also handle direct radio button changes
     $('.paid-providers-section input[type="radio"]').on('change', function() {
         if ($(this).is(':checked')) {
-            setTimeout(function() {
-                updateApiKeyFields();
-            }, 100);
+            updateApiKeyFields();
         }
     });
 
@@ -188,8 +183,6 @@ jQuery(document).ready(function($) {
         }, 1000);
     });
 
-    // Removed blur-based validation to avoid duplicate checks
-
     // Provider status dashboard
     if ($('.provider-status').length) {
         loadProviderStatus();
@@ -257,9 +250,4 @@ jQuery(document).ready(function($) {
     
     // Call initialization
     initializeInterface();
-
-    // Load provider status on page load
-    if ($('.provider-status').length) {
-        loadProviderStatus();
-    }
 });

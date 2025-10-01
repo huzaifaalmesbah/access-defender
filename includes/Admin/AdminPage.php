@@ -10,6 +10,8 @@
 
 namespace AccessDefender\Admin;
 
+use AccessDefender\Services\ApiProviderManager;
+
 /**
  * Class AdminPage
  *
@@ -20,15 +22,74 @@ namespace AccessDefender\Admin;
  */
 class AdminPage {
 	/**
+	 * Validate provider configuration before saving
+	 *
+	 * @param array $provider_input Provider settings input
+	 * @return array Array of validation errors
+	 * @since 1.1.0
+	 */
+	private function validate_provider_configuration( array $provider_input ): array {
+		$errors = array();
+		
+		// Check if paid mode is selected
+		if ( isset( $provider_input['provider_mode'] ) && $provider_input['provider_mode'] === 'paid' ) {
+			
+			// Check if paid provider is selected
+			if ( empty( $provider_input['paid_provider'] ) ) {
+				$errors[] = array(
+					'code' => 'no_paid_provider',
+					'message' => 'Please select a paid provider when using paid mode.'
+				);
+				return $errors;
+			}
+			
+			$selected_provider = $provider_input['paid_provider'];
+			
+			// Check if API key is provided
+			if ( empty( $provider_input['api_keys'][ $selected_provider ] ) ) {
+				$errors[] = array(
+					'code' => 'missing_api_key',
+					'message' => 'Please provide a valid API key for the selected paid provider.'
+				);
+				return $errors;
+			}
+			
+			// Validate API key
+			$api_key = trim( $provider_input['api_keys'][ $selected_provider ] );
+			if ( ! $this->validate_api_key_for_provider( $selected_provider, $api_key ) ) {
+				$errors[] = array(
+					'code' => 'invalid_api_key',
+					'message' => 'The provided API key is invalid. Please check your API key and try again.'
+				);
+			}
+		}
+		
+		return $errors;
+	}
+
+	/**
+	 * Validate API key for a specific provider
+	 *
+	 * @param string $provider_slug Provider slug
+	 * @param string $api_key API key to validate
+	 * @return bool True if valid, false otherwise
+	 * @since 1.1.0
+	 */
+	private function validate_api_key_for_provider( string $provider_slug, string $api_key ): bool {
+		try {
+			$api_manager = new ApiProviderManager();
+			return $api_manager->validate_api_key( $provider_slug, $api_key );
+		} catch ( Exception $e ) {
+			return false;
+		}
+	}
+
+	/**
 	 * The options for the Access Defender plugin
 	 *
-	 * @si						<input type="checkbox" 
-							   name="<?php echo esc_attr( $field ); ?>[]" 
-							   value="<?php echo esc_attr( $slug ); ?>"
-							   <?php checked( in_array( $slug, $value, true ) ); ?>
-							   style="margin-right: 8px;">.0.1
+	 * @since 1.0.1
 	 * @var array
-	 *  @access private
+	 * @access private
 	 */
 	private $options;
 
@@ -37,13 +98,7 @@ class AdminPage {
 	 *
 	 * @since 1.1.0
 	 * @var array
-	 * 				<input type="password" 
-					   name="<?php echo esc_attr( $field ); ?>[<?php echo esc_attr( $slug ); ?>]" 
-					   value="<?php echo esc_attr( $value[ $slug ] ?? '' ); ?>" 
-					   class="regular-text api-key-input" 
-					   style="width: 100%;"
-					   data-provider="<?php echo esc_attr( $slug ); ?>"
-					   placeholder="Enter your <?php echo esc_attr( $provider->get_name() ); ?> API key"> private
+	 * @access private
 	 */
 	private $core_settings;
 
@@ -67,32 +122,9 @@ class AdminPage {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'init_settings' ) );
 		add_action( 'admin_init', array( $this, 'handle_form_submission' ) );
-		
-		// Add debug endpoint for development
-		add_action( 'wp_ajax_debug_access_defender_options', array( $this, 'debug_options' ) );
 	}
 	
-	/**
-	 * Debug endpoint to check options
-	 * 
-	 * @since 1.1.0
-	 */
-	public function debug_options(): void {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Unauthorized' );
-		}
-		
-		$core_settings = get_option( 'accessdefender_core_settings', 'NOT FOUND' );
-		$provider_settings = get_option( 'accessdefender_provider_settings', 'NOT FOUND' );
-		
-		echo '<h3>Debug Access Defender Options</h3>';
-		echo '<h4>Core Settings:</h4>';
-		echo '<pre>' . print_r( $core_settings, true ) . '</pre>';
-		echo '<h4>Provider Settings:</h4>';
-		echo '<pre>' . print_r( $provider_settings, true ) . '</pre>';
-		
-		wp_die();
-	}
+
 
 	/**
 	 * Handle custom form submission for both option groups
@@ -100,19 +132,18 @@ class AdminPage {
 	 * @since 1.1.0
 	 */
 	public function handle_form_submission(): void {
-		// Check if our form was submitted
-		if ( ! isset( $_POST['action'] ) || $_POST['action'] !== 'accessdefender_save_settings' ) {
+		if ( ! isset( $_POST['submit'] ) ) {
 			return;
 		}
 
-		// Verify nonce
-		if ( ! isset( $_POST['accessdefender_nonce'] ) || ! wp_verify_nonce( $_POST['accessdefender_nonce'], 'accessdefender_save_settings' ) ) {
-			wp_die( 'Security check failed' );
+		if ( ! check_admin_referer( 'accessdefender_save_settings', 'accessdefender_nonce' ) ) {
+			add_settings_error( 'accessdefender_messages', 'security_check_failed', 'Security check failed', 'error' );
+			return;
 		}
 
-		// Check user permissions
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Insufficient permissions' );
+			add_settings_error( 'accessdefender_messages', 'insufficient_permissions', 'Insufficient permissions', 'error' );
+			return;
 		}
 
 		// Process core settings
@@ -146,6 +177,22 @@ class AdminPage {
 			}
 		}
 
+		// Validate paid provider settings before saving
+		$validation_errors = $this->validate_provider_configuration( $provider_input );
+		
+		if ( ! empty( $validation_errors ) ) {
+			// Add validation error messages
+			foreach ( $validation_errors as $error ) {
+				add_settings_error( 'accessdefender_messages', $error['code'], $error['message'], 'error' );
+			}
+			
+			// Force fallback to free mode if paid provider validation fails
+			if ( isset( $provider_input['provider_mode'] ) && $provider_input['provider_mode'] === 'paid' ) {
+				$provider_input['provider_mode'] = 'free';
+				$provider_input['free_providers'] = array( 'ip-api' ); // Default free provider
+			}
+		}
+
 		// Sanitize and save core settings
 		if ( ! empty( $core_input ) ) {
 			$sanitized_core = $this->sanitize_core_settings( $core_input );
@@ -158,13 +205,36 @@ class AdminPage {
 			update_option( 'accessdefender_provider_settings', $sanitized_provider );
 		}
 
-		// Add success notice
-		add_settings_error(
-			'accessdefender_messages',
-			'accessdefender_message',
-			'Settings saved successfully!',
-			'success'
-		);
+		// Store messages in transients to survive redirect
+		if ( ! empty( $validation_errors ) ) {
+			// Store error messages
+			$error_messages = array();
+			foreach ( $validation_errors as $error ) {
+				$error_messages[] = array(
+					'message' => $error['message'],
+					'type' => 'error'
+				);
+			}
+			
+			// Add fallback message if switched to free mode
+			if ( isset( $provider_input['provider_mode'] ) && $provider_input['provider_mode'] === 'free' ) {
+				$error_messages[] = array(
+					'message' => 'Switched to free mode due to validation errors.',
+					'type' => 'notice-warning'
+				);
+			}
+			
+			set_transient( 'accessdefender_admin_messages', $error_messages, 30 );
+		} else {
+			// Store success message
+			$success_messages = array(
+				array(
+					'message' => 'Settings saved successfully!',
+					'type' => 'updated'
+				)
+			);
+			set_transient( 'accessdefender_admin_messages', $success_messages, 30 );
+		}
 
 		// Redirect to prevent resubmission
 		$redirect_url = add_query_arg( 'settings-updated', 'true', wp_get_referer() );
@@ -194,7 +264,31 @@ class AdminPage {
 	 */
 	public function render_admin_page(): void {
 		$this->load_options();
+		$this->display_admin_messages();
 		require_once ACCESS_DEFENDER_PATH . 'includes/Views/admin/settings-page.php';
+	}
+
+	/**
+	 * Display admin messages from transients
+	 *
+	 * @since 1.1.0
+	 */
+	private function display_admin_messages(): void {
+		$messages = get_transient( 'accessdefender_admin_messages' );
+		
+		if ( $messages && is_array( $messages ) ) {
+			foreach ( $messages as $message ) {
+				add_settings_error(
+					'accessdefender_messages',
+					'accessdefender_message_' . uniqid(),
+					$message['message'],
+					$message['type']
+				);
+			}
+			
+			// Clear the transient after displaying
+			delete_transient( 'accessdefender_admin_messages' );
+		}
 	}
 
 	/**
@@ -441,7 +535,7 @@ class AdminPage {
 		}
 		
 		// Get API provider manager to list providers
-		$provider_manager = new \AccessDefender\Services\ApiProviderManager();
+		$provider_manager = new ApiProviderManager();
 		$providers = $provider_manager->get_all_providers();
 		
 		$provider_mode = $this->options['provider_mode'] ?? 'free';
@@ -498,7 +592,7 @@ class AdminPage {
 		$value = $this->options[ $field ] ?? '';
 		
 		// Get API provider manager to list providers
-		$provider_manager = new \AccessDefender\Services\ApiProviderManager();
+		$provider_manager = new ApiProviderManager();
 		$providers = $provider_manager->get_all_providers();
 		
 		$provider_mode = $this->options['provider_mode'] ?? 'free';
@@ -573,7 +667,7 @@ class AdminPage {
 		$value = $this->options[ $field ] ?? array();
 		
 		// Get API provider manager to list providers
-		$provider_manager = new \AccessDefender\Services\ApiProviderManager();
+		$provider_manager = new ApiProviderManager();
 		$providers = $provider_manager->get_all_providers();
 		
 		$provider_mode = $this->options['provider_mode'] ?? 'free';
@@ -630,13 +724,7 @@ class AdminPage {
 	 * @since 1.1.0
 	 */
 	public function validate_core_settings( $input ): array {
-		// Add debugging
-		error_log( 'Access Defender: validate_core_settings called with input: ' . print_r( $input, true ) );
-		
 		$sanitized = $this->sanitize_core_settings( $input );
-		
-		// Add debugging
-		error_log( 'Access Defender: validate_core_settings returning: ' . print_r( $sanitized, true ) );
 		
 		// Add admin notice to confirm saving
 		add_settings_error(
@@ -692,10 +780,6 @@ class AdminPage {
 			$sanitized['installed_date'] = sanitize_text_field( $input['installed_date'] );
 		}
 
-		// Add debugging
-		error_log( 'Access Defender: sanitize_core_settings input: ' . print_r( $input, true ) );
-		error_log( 'Access Defender: sanitize_core_settings sanitized: ' . print_r( $sanitized, true ) );
-
 		return $sanitized;
 	}
 
@@ -749,20 +833,4 @@ class AdminPage {
 		return $sanitized;
 	}
 
-	/**
-	 * Get the correct option name for a given field
-	 *
-	 * @param string $field Field name
-	 * @return string Option name (core or provider settings)
-	 * @since 1.1.0
-	 */
-	private function get_option_name_for_field( string $field ): string {
-		$core_fields = array( 'enable_vpn_blocking', 'warning_title', 'warning_message' );
-		
-		if ( in_array( $field, $core_fields, true ) ) {
-			return 'accessdefender_core_settings';
-		}
-		
-		return 'accessdefender_provider_settings';
-	}
 }

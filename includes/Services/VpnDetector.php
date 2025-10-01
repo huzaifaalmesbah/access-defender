@@ -12,6 +12,8 @@
 
 namespace AccessDefender\Services;
 
+use AccessDefender\Services\ApiProviderManager;
+
 /**
  * Class VpnDetector
  *

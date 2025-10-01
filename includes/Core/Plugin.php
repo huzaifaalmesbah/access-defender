@@ -198,12 +198,14 @@ class Plugin implements PluginInterface {
 	public function ajax_validate_api_key(): void {
 		// Verify nonce
 		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'accessdefender_admin_nonce' ) ) {
-			wp_die( 'Invalid nonce' );
+			wp_send_json_error( 'Invalid nonce' );
+			return;
 		}
 
 		// Check user capability
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Insufficient permissions' );
+			wp_send_json_error( 'Insufficient permissions' );
+			return;
 		}
 
 		$provider = sanitize_text_field( $_POST['provider'] ?? '' );
@@ -224,12 +226,14 @@ class Plugin implements PluginInterface {
 	public function ajax_provider_status(): void {
 		// Verify nonce
 		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'accessdefender_admin_nonce' ) ) {
-			wp_die( 'Invalid nonce' );
+			wp_send_json_error( 'Invalid nonce' );
+			return;
 		}
 
 		// Check user capability
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( 'Insufficient permissions' );
+			wp_send_json_error( 'Insufficient permissions' );
+			return;
 		}
 
 		$api_manager = new ApiProviderManager();
