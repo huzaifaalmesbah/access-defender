@@ -75,6 +75,8 @@ class Plugin implements PluginInterface {
 	 * @return void
 	 */
 	public function init(): void {
+		// Check for version upgrade and run migration if needed
+		$this->check_version_upgrade();
 		$this->init_hooks();
 		$this->admin_page->init();
 
@@ -240,5 +242,42 @@ class Plugin implements PluginInterface {
 		$status      = $api_manager->get_providers_status();
 
 		wp_send_json_success( $status );
+	}
+
+	/**
+	 * Check for version upgrade and run migration if needed
+	 *
+	 * @return void
+	 * @since 1.1.0
+	 */
+	private function check_version_upgrade(): void {
+		$core_settings = get_option( 'accessdefender_core_settings', array() );
+		$stored_version = $core_settings['version'] ?? '';
+		
+		// If no version is stored or version is different, check for migration needs
+		if ( empty( $stored_version ) || version_compare( $stored_version, ACCESS_DEFENDER_VERSION, '<' ) ) {
+			// Check if legacy options exist and need migration
+			$legacy_options = get_option( 'accessdefender_options' );
+			
+			if ( $legacy_options && is_array( $legacy_options ) ) {
+				// Run migration
+				ActivationHooks::migrate_legacy_options();
+			}
+			
+			// Update version in core settings
+			if ( empty( $core_settings ) ) {
+				// If core settings don't exist, create them
+				ActivationHooks::setup_core_settings();
+			} else {
+				// Update version in existing core settings
+				$core_settings['version'] = ACCESS_DEFENDER_VERSION;
+				update_option( 'accessdefender_core_settings', $core_settings );
+			}
+			
+			// Ensure provider settings exist
+			if ( ! get_option( 'accessdefender_provider_settings' ) ) {
+				ActivationHooks::setup_provider_settings();
+			}
+		}
 	}
 }

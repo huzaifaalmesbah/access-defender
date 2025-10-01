@@ -47,7 +47,7 @@ class ActivationHooks {
 	 *
 	 * @return void
 	 */
-	private static function setup_core_settings(): void {
+	public static function setup_core_settings(): void {
 		if ( ! get_option( 'accessdefender_core_settings' ) ) {
 			$core_settings = array(
 				'enable_vpn_blocking' => '1',
@@ -68,7 +68,7 @@ class ActivationHooks {
 	 *
 	 * @return void
 	 */
-	private static function setup_provider_settings(): void {
+	public static function setup_provider_settings(): void {
 		if ( ! get_option( 'accessdefender_provider_settings' ) ) {
 			$provider_settings = array(
 				'provider_mode'    => 'free',
@@ -95,7 +95,7 @@ class ActivationHooks {
 	 *
 	 * @return void
 	 */
-	private static function migrate_legacy_options(): void {
+	public static function migrate_legacy_options(): void {
 		$legacy_options = get_option( 'accessdefender_options' );
 		
 		// Only migrate if legacy options exist and contain the expected core fields
@@ -113,6 +113,14 @@ class ActivationHooks {
 				// Handle HTML entities from legacy data
 				$message = wp_kses_post( html_entity_decode( $legacy_options['warning_message'] ) );
 				$core_settings['warning_message'] = $message;
+			}
+			
+			// Add version and installed date if not present
+			if ( ! isset( $core_settings['version'] ) ) {
+				$core_settings['version'] = ACCESS_DEFENDER_VERSION;
+			}
+			if ( ! isset( $core_settings['installed_date'] ) ) {
+				$core_settings['installed_date'] = current_time( 'mysql' );
 			}
 			
 			// Update core settings with migrated data
