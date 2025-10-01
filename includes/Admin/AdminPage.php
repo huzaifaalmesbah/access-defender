@@ -121,7 +121,8 @@ class AdminPage {
 	public function init(): void {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'init_settings' ) );
-		add_action( 'admin_init', array( $this, 'handle_form_submission' ) );
+		// Use a lower priority to ensure this runs after other plugins
+		add_action( 'admin_init', array( $this, 'handle_form_submission' ), 20 );
 	}
 	
 
@@ -132,7 +133,19 @@ class AdminPage {
 	 * @since 1.1.0
 	 */
 	public function handle_form_submission(): void {
+		// Only process form submissions on our settings page
+		$current_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		if ( $current_page !== 'access-defender' ) {
+			return;
+		}
+
 		if ( ! isset( $_POST['submit'] ) ) {
+			return;
+		}
+
+		// Check if this is our form submission by looking for our action
+		$form_action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
+		if ( $form_action !== 'accessdefender_save_settings' ) {
 			return;
 		}
 
@@ -624,7 +637,7 @@ class AdminPage {
 		<?php foreach ( $providers as $slug => $provider ) : ?>
 					<?php if ( ! $provider->is_free() ) : ?>
 				<?php 
-					$enabled_paid_slugs = array( 'proxycheck', 'ipgeolocation' );
+					$enabled_paid_slugs = array( 'ipgeolocation', 'proxycheck' );
 					$is_enabled = in_array( $slug, $enabled_paid_slugs, true );
 				?>
 				<div class="provider-card <?php echo $value === $slug ? 'selected' : ''; ?> <?php echo $is_enabled ? '' : 'disabled'; ?>">

@@ -4,7 +4,7 @@ Tags: security, firewall, spam, privacy, protection
 Requires at least: 5.9
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -194,6 +194,11 @@ We provide comprehensive support:
 5. API Key Management - Secure premium provider configuration
 
 == Changelog ==
+
+= 1.1.2 =
+* Improved: Enhanced stability and performance optimizations
+* Fixed: Minor bug fixes and improvements
+* Updated: Code quality and documentation improvements
 
 = 1.1.1 =
 * Fixed: VPN blocking setting not saving when disabled

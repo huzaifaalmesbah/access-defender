@@ -63,8 +63,8 @@ class ApiProviderManager {
 			'ip-api'         => new IpApiProvider(),        // Has proxy/hosting fields
 			
 			// Paid providers with advanced VPN/Proxy detection (ordered by preference)
+			'ipgeolocation'  => new IpGeolocationProvider(), // First choice - Security data with VPN detection
 			'proxycheck'     => new ProxyCheckProvider(),   // Proxy/VPN detection via proxycheck.io
-			'ipgeolocation'  => new IpGeolocationProvider(), // Security data with VPN detection
 			'ip-api-paid'    => new IpApiPaidProvider(),    // IP-API Pro - Premium with higher limits
 		);
 	}

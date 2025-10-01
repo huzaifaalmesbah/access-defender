@@ -61,7 +61,7 @@ class IpGeolocationProvider extends BaseProvider {
 	 * @return int Rate limit
 	 */
 	public function get_rate_limit(): int {
-		return 30000; // 30k requests per month for basic paid plan
+		return 150000; // 150,000 requests per month.
 	}
 
 	/**
@@ -184,7 +184,7 @@ class IpGeolocationProvider extends BaseProvider {
 	 * @return string Signup URL
 	 */
 	public function get_signup_url(): string {
-		return 'https://ipgeolocation.io/signup.html';
+		return 'https://app.ipgeolocation.io/signup?referral=AFF-AEWA9LQLBL';
 	}
 
 }
