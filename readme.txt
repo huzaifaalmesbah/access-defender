@@ -14,39 +14,39 @@ Advanced VPN & proxy blocker for WordPress. 99.9% accuracy, multi-API rotation, 
 
 **Access Defender** is the most comprehensive WordPress security plugin for blocking VPNs, proxies, and suspicious traffic. Protect your website from malicious users, spam, fraud, and unauthorized access with our advanced multi-provider detection system.
 
-🚀 **NEW in Version 1.1.0**: Revolutionary multi-provider system with automatic failover, real-time monitoring, and enhanced reliability!
+**NEW in Version 1.1.0**: Revolutionary multi-provider system with automatic failover, real-time monitoring, and enhanced reliability!
 
-=== 🔥 Key Features ===
+=== Key Features ===
 
-**🛡️ Advanced VPN & Proxy Detection**
+** Advanced VPN & Proxy Detection**
 * **99.9% Detection Accuracy** - Industry-leading precision in identifying VPNs, proxies, and hosting providers
 * **Multiple Detection Methods** - Comprehensive IP analysis using advanced algorithms
 * **Real-time Threat Assessment** - Instant blocking of suspicious traffic
 
-**⚡ Multi-Provider System (NEW!)**
+** Multi-Provider System (NEW!)**
 * **4+ API Providers** - Choose from free and premium services
 * **Smart Auto-Rotation** - Automatic switching between providers when limits are reached
 * **Zero Downtime Protection** - Seamless failover ensures continuous security
 * **Load Balancing** - Distribute requests across multiple providers for optimal performance
 
-**📊 Real-time Monitoring & Analytics**
+** Real-time Monitoring & Analytics**
 * **Live Usage Statistics** - Monitor API calls, success rates, and provider performance
 * **Detailed Reporting** - Track blocked attempts, provider efficiency, and security metrics
 * **Performance Insights** - Optimize your security setup with actionable data
 
-**🎯 Smart Configuration Options**
+** Smart Configuration Options**
 * **Free Provider Auto-Rotation** - Perfect for small to medium websites
 * **Premium Provider Support** - Enhanced reliability for high-traffic sites
 * **Flexible API Management** - Easy switching between providers
 * **Custom Rate Limiting** - Intelligent request management
 
-**🔧 User-Friendly Features**
+** User-Friendly Features**
 * **One-Click Setup** - Get protected in minutes
 * **Customizable Block Messages** - Professional warning pages for blocked users
 * **Admin Bypass** - Administrators never get blocked
 * **Bot-Friendly** - Automatic detection and allowance of search engine crawlers
 
-=== 🌟 Why Choose Access Defender? ===
+=== Why Choose Access Defender? ===
 
 **For Website Owners:**
 * Protect against fraud, spam, and malicious activities
@@ -66,24 +66,24 @@ Advanced VPN & proxy blocker for WordPress. 99.9% accuracy, multi-API rotation, 
 * Ensure genuine user engagement metrics
 * Maintain advertising revenue integrity
 
-=== 🚀 Supported API Providers ===
+=== Supported API Providers ===
 
-**🆓 Free Providers (Auto-Rotation Enabled):**
+** Free Providers (Auto-Rotation Enabled):**
 * **IP-API.com (Free)** - 45 requests/minute, reliable detection
 * **Additional Free APIs** - Coming soon for enhanced rotation
 
-**💎 Premium Providers (Enhanced Performance):**
+** Premium Providers (Enhanced Performance):**
 * **ProxyCheck.io** - Professional-grade detection with 99.9% accuracy
 * **IPGeolocation.io** - Advanced geolocation and VPN detection
 * **IP-API.com (Pro)** - Premium tier with higher limits (Coming Soon)
 
-**🔄 Smart Provider Management:**
+** Smart Provider Management:**
 * Sequential rotation through free providers
 * Automatic failover when rate limits are reached
 * Real-time provider health monitoring
 * Intelligent request distribution
 
-=== 🎯 Perfect For ===
+=== Perfect For ===
 * **E-commerce Websites** - Prevent fraud and protect transactions
 * **Membership Sites** - Control access to premium content
 * **Corporate Websites** - Maintain security compliance
@@ -93,7 +93,7 @@ Advanced VPN & proxy blocker for WordPress. 99.9% accuracy, multi-API rotation, 
 
 == Installation ==
 
-=== 🚀 Quick Start (Recommended) ===
+= Quick Start (Recommended) =
 1. **Install from WordPress Dashboard:**
    - Go to **Plugins > Add New**
    - Search for "Access Defender"
@@ -105,27 +105,27 @@ Advanced VPN & proxy blocker for WordPress. 99.9% accuracy, multi-API rotation, 
    - Customize your block message
    - Save settings and you're protected!
 
-=== 📁 Manual Installation ===
+= Manual Installation =
 1. Download the plugin zip file
 2. Go to **Plugins > Add New > Upload Plugin**
 3. Upload and activate the plugin
 4. Follow the configuration steps above
 
-=== ⚙️ Configuration Guide ===
+= Configuration Guide =
 
-**🆓 For Free Users (Recommended Start):**
+** For Free Users (Recommended Start):**
 1. Select **"Free Providers with Auto-Rotation"**
 2. Enable multiple free APIs for maximum uptime
 3. Monitor usage in real-time dashboard
 4. Upgrade to premium when needed
 
-**💎 For Premium Users:**
+** For Premium Users:**
 1. Choose your preferred **Premium Provider**
 2. Enter your **API Key** (get from provider's website)
 3. Validate key and start advanced protection
 4. Monitor enhanced statistics and performance
 
-**🎨 Customization Options:**
+** Customization Options:**
 * **Warning Title** - Professional "Access Denied" message
 * **Warning Message** - Explain why access was blocked
 * **Admin Bypass** - Ensure administrators are never blocked
@@ -133,20 +133,20 @@ Advanced VPN & proxy blocker for WordPress. 99.9% accuracy, multi-API rotation, 
 
 == Frequently Asked Questions ==
 
-= 🤔 How accurate is the VPN/Proxy detection? =
+= How accurate is the VPN/Proxy detection? =
 Access Defender achieves **99.9% accuracy** by using multiple detection methods and premium API providers. Our multi-provider system ensures the highest possible detection rates while minimizing false positives.
 
-= 💰 What's the difference between free and premium providers? =
+= What's the difference between free and premium providers? =
 **Free Providers:** Perfect for small-medium sites, auto-rotation prevents downtime, 45+ requests/minute combined
 **Premium Providers:** Higher limits (1000+ requests/minute), faster response times, 99.9% uptime, advanced detection algorithms
 
-= 🔄 How does auto-rotation work? =
+= How does auto-rotation work? =
 Our smart system uses free providers sequentially. When one hits its rate limit, it automatically switches to the next available provider. This ensures **zero downtime** and continuous protection.
 
-= 🛠️ Can I use multiple premium providers? =
+= Can I use multiple premium providers? =
 Currently, you can select one premium provider at a time, but you can easily switch between them. We recommend choosing the provider that best fits your traffic volume and budget.
 
-= 📊 Can I monitor the plugin's performance? =
+= Can I monitor the plugin's performance? =
 Yes! Access Defender includes a **real-time dashboard** showing:
 - API usage statistics
 - Success/failure rates
@@ -154,17 +154,17 @@ Yes! Access Defender includes a **real-time dashboard** showing:
 - Blocked attempt logs
 - Monthly usage tracking
 
-= 🎯 Will this affect my website's performance? =
+= Will this affect my website's performance? =
 No! Access Defender is optimized for speed:
 - Lightweight code (< 1MB)
 - Asynchronous API calls
 - Smart caching mechanisms
 - Minimal server resource usage
 
-= 🤖 Will search engines be blocked? =
+= Will search engines be blocked? =
 Never! Access Defender automatically detects and allows legitimate search engine bots (Google, Bing, Yahoo, etc.) ensuring your SEO remains unaffected.
 
-= 🔧 What if I need help with setup? =
+= What if I need help with setup? =
 We provide comprehensive support:
 - Detailed documentation
 - Video tutorials
@@ -179,8 +179,8 @@ We provide comprehensive support:
 
 == Changelog ==
 
-= 1.1.0 - Major Multi-Provider Update 🚀 =
-**🆕 New Features:**
+= 1.1.0 - Major Multi-Provider Update =
+** New Features:**
 * **Multi-Provider System** - Support for 4+ API providers (free and premium)
 * **Smart Auto-Rotation** - Automatic switching between free providers
 * **Real-time Monitoring** - Live statistics and performance tracking
@@ -188,13 +188,13 @@ We provide comprehensive support:
 * **Dynamic API Management** - Easy provider switching and key validation
 * **Enhanced Admin Interface** - Redesigned dashboard with better UX
 
-**🔧 Improvements:**
+** Improvements:**
 * **Better Error Handling** - Robust fallback systems
 * **Optimized Performance** - Faster response times and reduced resource usage
 * **Smart Rate Limiting** - Per-minute and monthly usage tracking
 * **Organized Code Structure** - Cleaner provider architecture
 
-**🐛 Bug Fixes:**
+** Bug Fixes:**
 * Fixed plugin options migration system
 * Improved uninstall process
 * Enhanced compatibility with latest WordPress versions
@@ -220,24 +220,24 @@ We provide comprehensive support:
 * **Improved:** Search engine bot detection and verification
 
 = 1.0.0 =
-* **🎉 Initial Release** - VPN and proxy detection with ip-api.com
+* ** Initial Release** - VPN and proxy detection with ip-api.com
 * **Added:** Customizable warning messages
 * **Implemented:** Advanced IP address detection methods
 
 == Upgrade Notice ==
 
 = 1.1.0 =
-🚀 **MAJOR UPDATE**: Revolutionary multi-provider system with auto-rotation and real-time monitoring! Your existing settings will be automatically migrated. This update significantly improves reliability and adds premium provider options.
+ **MAJOR UPDATE**: Revolutionary multi-provider system with auto-rotation and real-time monitoring! Your existing settings will be automatically migrated. This update significantly improves reliability and adds premium provider options.
 
 = 1.0.4 =
-🔧 **Critical Fix**: Resolves uninstall errors - immediate update recommended for proper plugin management.
+ **Critical Fix**: Resolves uninstall errors - immediate update recommended for proper plugin management.
 
-== 🔒 Privacy & Security ==
+== Privacy & Security ==
 
 **Data Collection & Processing:**
 Access Defender prioritizes your privacy while providing maximum security. Here's what you need to know:
 
-**🌐 API Provider Data Sharing:**
+** API Provider Data Sharing:**
 When visitors access your website, their IP addresses are securely transmitted to your selected API provider(s) for VPN/proxy analysis. This is essential for the security service to function.
 
 **Supported Providers & Their Policies:**
@@ -245,13 +245,13 @@ When visitors access your website, their IP addresses are securely transmitted t
 * **ProxyCheck.io** - [Privacy Policy](https://proxycheck.io/)
 * **IPGeolocation.io** - [Privacy Policy](https://ipgeolocation.io/privacy-policy)
 
-**🔐 Data Security Measures:**
+** Data Security Measures:**
 * All API communications use HTTPS encryption
 * No personal data beyond IP addresses is transmitted
 * Providers only use data for VPN/proxy identification
 * No data is stored permanently by API providers
 
-**📊 Analytics & Telemetry:**
+** Analytics & Telemetry:**
 Access Defender uses [Appsero](https://appsero.com) SDK for optional analytics:
 * **Opt-in Only** - Data collection requires your explicit consent
 * **Anonymous Usage Data** - Helps improve plugin performance
@@ -273,7 +273,7 @@ Access Defender is licensed under **GPLv2 or later**. This ensures the plugin re
 
 == Terms of Use & Disclaimer ==
 
-**⚖️ Important Legal Information:**
+** Important Legal Information:**
 
 Access Defender is provided "as-is" without warranty of any kind. While we strive to provide the highest level of security and reliability:
 
@@ -282,7 +282,7 @@ Access Defender is provided "as-is" without warranty of any kind. While we striv
 * **Service Availability:** API provider changes may affect functionality
 * **User Responsibility:** Proper configuration and monitoring are essential
 
-**🛡️ Best Practices:**
+** Best Practices:**
 * Regularly monitor plugin performance
 * Keep plugin updated to latest version
 * Test configuration on staging environment
