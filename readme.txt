@@ -173,11 +173,9 @@ We provide comprehensive support:
 
 == Screenshots ==
 
-1. **🎛️ Advanced Settings Dashboard** - Intuitive control panel with provider selection and real-time monitoring
-2. **📊 Real-time Analytics** - Comprehensive statistics showing API usage, success rates, and provider performance
-3. **🛡️ Professional Block Page** - Customizable warning message shown to blocked users
-4. **⚙️ Provider Configuration** - Easy setup for both free and premium API providers
-5. **📈 Usage Monitoring** - Track your protection effectiveness and optimize settings
+1. Advanced Settings Dashboard (Free API Mode) - Intuitive control panel with free provider auto-rotation, real-time API usage tracking, and zero-configuration protection
+2. Advanced Settings Dashboard (Premium API Mode) - Professional-grade interface with single premium provider selection, enhanced rate limits, and priority support integration
+3. Professional Block Page - Customizable warning message shown to blocked users with your branding and explanation text
 
 == Changelog ==
 
