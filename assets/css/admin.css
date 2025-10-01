@@ -472,6 +472,26 @@ input:checked + .slider:before {
     background: #fff3cd;
     color: #856404;
 }
+
+.provider-badge.coming-soon {
+    background: #e2e3e5;
+    color: #6c757d;
+    margin-left: 5px;
+}
+
+.provider-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.provider-card.coming-soon {
+    border-style: dashed;
+    border-color: #dee2e6;
+}
+
+.status-indicator.coming-soon {
+    background-color: #6c757d;
+}
 /* Responsive Design */
 @media screen and (max-width: 782px) {
     .access-defender-container {

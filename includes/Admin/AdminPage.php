@@ -572,6 +572,28 @@ class AdminPage {
 						</div>
 					<?php endif; ?>
 				<?php endforeach; ?>
+				
+				<!-- Coming Soon Free Provider -->
+				<div class="provider-card disabled coming-soon">
+					<label style="cursor: not-allowed; display: block; opacity: 0.6;">
+						<input type="checkbox" 
+							   disabled
+							   style="margin-right: 8px;">
+						<h4>Additional Free Provider
+							<span class="provider-badge free">Free</span>
+							<span class="provider-badge coming-soon">Coming Soon</span>
+						</h4>
+						<p class="provider-limit-info">
+							<strong>Enhanced rotation capabilities coming soon</strong>
+						</p>
+						<div class="provider-status">
+							<span class="status-indicator coming-soon"></span>
+							<span class="provider-stats">
+								More free providers for better reliability
+							</span>
+						</div>
+					</label>
+				</div>
 			</div>
 			<p class="description">
 				<strong>Smart Rotation:</strong> When one provider hits its monthly limit, the system automatically switches to the next available provider. Select multiple providers for maximum reliability.
