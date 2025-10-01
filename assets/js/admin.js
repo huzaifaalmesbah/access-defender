@@ -1,34 +1,58 @@
 jQuery(document).ready(function($) {
+    // Tab functionality
+    $('.access-defender-container .nav-tab').on('click', function(e) {
+        e.preventDefault();
+        
+        var targetTab = $(this).data('tab');
+        
+        // Remove active class from all tabs and tab panes
+        $('.access-defender-container .nav-tab').removeClass('nav-tab-active');
+        $('.access-defender-container .tab-pane').removeClass('active');
+        
+        // Add active class to clicked tab and corresponding pane
+        $(this).addClass('nav-tab-active');
+        $('.access-defender-container #' + targetTab + '-tab').addClass('active');
+        
+        // Store active tab in localStorage for persistence
+        localStorage.setItem('accessDefenderActiveTab', targetTab);
+    });
+    
+    // Restore active tab from localStorage
+    var activeTab = localStorage.getItem('accessDefenderActiveTab');
+    if (activeTab) {
+        $('.access-defender-container .nav-tab[data-tab="' + activeTab + '"]').click();
+    }
+
     // Handle switch toggle animation
-    $('.switch input[type="checkbox"]').on('change', function() {
+    $('.access-defender-container .switch input[type="checkbox"]').on('change', function() {
         $(this).next('.slider').toggleClass('checked', this.checked);
     });
 
     // Provider mode switching - v1.1.0 Smart Interface
-    $('.provider-mode-radio').on('change', function() {
+    $('.access-defender-container .provider-mode-radio').on('change', function() {
         var mode = $(this).val();
         
         if (mode === 'free') {
-            $('.free-providers-section').slideDown(300);
-            $('.paid-providers-section').slideUp(300);
-            $('#no-api-key-needed').slideDown(300);
-            $('.api-key-field').stop(true, true).slideUp(300);
-            $('.free-providers-header').fadeIn(200);
-            $('.paid-providers-header').fadeOut(200);
+            $('.access-defender-container .free-providers-section').slideDown(300);
+            $('.access-defender-container .paid-providers-section').slideUp(300);
+            $('.access-defender-container #no-api-key-needed').slideDown(300);
+            $('.access-defender-container .api-key-field').stop(true, true).slideUp(300);
+            $('.access-defender-container .free-providers-header').fadeIn(200);
+            $('.access-defender-container .paid-providers-header').fadeOut(200);
         } else if (mode === 'paid') {
-            $('.free-providers-section').slideUp(300);
-            $('.paid-providers-section').slideDown(300, function() {
+            $('.access-defender-container .free-providers-section').slideUp(300);
+            $('.access-defender-container .paid-providers-section').slideDown(300, function() {
                 // Only update API key fields after paid section is fully shown
                 updateApiKeyFields();
             });
-            $('#no-api-key-needed').slideUp(300);
-            $('.free-providers-header').fadeOut(200);
-            $('.paid-providers-header').fadeIn(200);
+            $('.access-defender-container #no-api-key-needed').slideUp(300);
+            $('.access-defender-container .free-providers-header').fadeOut(200);
+            $('.access-defender-container .paid-providers-header').fadeIn(200);
         }
     });
 
     // Provider card selection
-    $('.provider-card').on('click', function() {
+    $('.access-defender-container .provider-card').on('click', function() {
         var $card = $(this);
         var $input = $card.find('input[type="checkbox"], input[type="radio"]');
         
@@ -38,7 +62,7 @@ jQuery(document).ready(function($) {
             $card.toggleClass('selected', $input.prop('checked'));
         } else {
             // Paid provider - single selection
-            $('.paid-providers-section .provider-card').removeClass('selected');
+            $('.access-defender-container .paid-providers-section .provider-card').removeClass('selected');
             $card.addClass('selected');
             $input.prop('checked', true);
             updateApiKeyFields();
@@ -46,20 +70,20 @@ jQuery(document).ready(function($) {
     });
 
     // Prevent card click when clicking directly on input
-    $('.provider-card input').on('click', function(e) {
+    $('.access-defender-container .provider-card input').on('click', function(e) {
         e.stopPropagation();
         var $card = $(this).closest('.provider-card');
         $card.toggleClass('selected', $(this).prop('checked'));
         
         if ($(this).attr('type') === 'radio') {
-            $('.paid-providers-section .provider-card').removeClass('selected');
+            $('.access-defender-container .paid-providers-section .provider-card').removeClass('selected');
             $card.addClass('selected');
             updateApiKeyFields();
         }
     });
 
     // Also handle direct radio button changes
-    $('.paid-providers-section input[type="radio"]').on('change', function() {
+    $('.access-defender-container .paid-providers-section input[type="radio"]').on('change', function() {
         if ($(this).is(':checked')) {
             updateApiKeyFields();
         }
@@ -67,40 +91,40 @@ jQuery(document).ready(function($) {
 
     // Update API key fields based on selected paid provider
     function updateApiKeyFields() {
-        var selectedProvider = $('.paid-providers-section input[type="radio"]:checked').val();
+        var selectedProvider = $('.access-defender-container .paid-providers-section input[type="radio"]:checked').val();
         
         // Hide all API key fields first
-        $('.api-key-field').stop(true, true).slideUp(200);
+        $('.access-defender-container .api-key-field').stop(true, true).slideUp(200);
         
         // Show the selected provider's API key field
         if (selectedProvider) {
             setTimeout(function() {
-                $('.api-key-' + selectedProvider).stop(true, true).slideDown(300);
+                $('.access-defender-container .api-key-' + selectedProvider).stop(true, true).slideDown(300);
             }, 250); // Small delay to ensure hide animation completes
         }
     }
 
     // Initialize API key fields visibility
     function initializeApiKeyFields() {
-        var currentMode = $('.provider-mode-radio:checked').val();
-        var selectedProvider = $('.paid-providers-section input[type="radio"]:checked').val();
+        var currentMode = $('.access-defender-container .provider-mode-radio:checked').val();
+        var selectedProvider = $('.access-defender-container .paid-providers-section input[type="radio"]:checked').val();
         
         if (currentMode === 'paid' && selectedProvider) {
             // Show the correct API key field without animation on page load
-            $('.api-key-' + selectedProvider).show();
+            $('.access-defender-container .api-key-' + selectedProvider).show();
         } else {
             // Hide all API key fields
-            $('.api-key-field').hide();
+            $('.access-defender-container .api-key-field').hide();
         }
     }
 
     // API Key validation - on link click
-    $(document).on('click', '.api-key-validate-link', function(e) {
+    $(document).on('click', '.access-defender-container .api-key-validate-link', function(e) {
         e.preventDefault();
         var provider = $(this).data('provider');
-        var $input = $('.api-key-' + provider + ' .api-key-input');
+        var $input = $('.access-defender-container .api-key-' + provider + ' .api-key-input');
         var apiKey = $input.val().trim();
-        var $status = $('#status-' + provider);
+        var $status = $('.access-defender-container #status-' + provider);
 
         if (apiKey === '') {
             $status.text('');
@@ -134,11 +158,11 @@ jQuery(document).ready(function($) {
     // Debounced auto-validate on input with in-flight aborting and ajaxurl fallback
     var validateTimers = {};
     var inflightXhrs = {};
-    $(document).on('input', '.api-key-input', function() {
+    $(document).on('input', '.access-defender-container .api-key-input', function() {
         var $input = $(this);
         var provider = $input.data('provider');
         var apiKey = $input.val().trim();
-        var $status = $('#status-' + provider);
+        var $status = $('.access-defender-container #status-' + provider);
         var ajaxUrl = (window.accessdefender_admin && accessdefender_admin.ajaxurl) ? accessdefender_admin.ajaxurl : (window.ajaxurl || '/wp-admin/admin-ajax.php');
 
         if (!provider) return;

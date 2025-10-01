@@ -48,7 +48,7 @@ if ( false === $profile ) {
 }
 ?>
 
-<div class="access-defender-card">
+<div class="access-defender-about">
 	<?php if ( $profile ) : ?>
 		<div class="sidebar-section developer-profile">
 			<h3><?php esc_html_e( 'Developer Profile', 'access-defender' ); ?></h3>
