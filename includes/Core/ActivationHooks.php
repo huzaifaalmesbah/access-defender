@@ -134,11 +134,11 @@ class ActivationHooks {
 		
 		foreach ( $providers as $provider ) {
 			// Clear monthly usage stats
-			delete_option( "accessdefender_usage_{$provider}_" . date( 'Y-m' ) );
+			delete_option( "accessdefender_usage_{$provider}_" . gmdate( 'Y-m' ) );
 			delete_option( "accessdefender_stats_{$provider}" );
 			
 			// Clear per-minute rate limiting
-			delete_option( "accessdefender_minute_{$provider}_" . date( 'Y-m-d-H-i' ) );
+			delete_option( "accessdefender_minute_{$provider}_" . gmdate( 'Y-m-d-H-i' ) );
 		}
 		
 		// Clear cached IP data
@@ -187,6 +187,7 @@ class ActivationHooks {
 		global $wpdb;
 		
 		// Clear all provider usage stats (monthly and per-minute)
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s OR option_name LIKE %s",
@@ -195,8 +196,10 @@ class ActivationHooks {
 				'accessdefender_minute_%'
 			)
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		
 		// Clear all plugin transients
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
@@ -204,6 +207,7 @@ class ActivationHooks {
 				'_transient_timeout_accessdefender_%'
 			)
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		
 		// Clear specific transients
 		$transients = array(

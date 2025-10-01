@@ -184,7 +184,7 @@ class ApiProviderManager {
 			return false; // Unlimited
 		}
 
-		$usage_key = 'accessdefender_usage_' . $provider_slug . '_' . date( 'Y-m' );
+		$usage_key = 'accessdefender_usage_' . $provider_slug . '_' . gmdate( 'Y-m' );
 		$current_usage = get_option( $usage_key, 0 );
 
 		// Consider severely limited if over 150% of rate limit
@@ -224,7 +224,7 @@ class ApiProviderManager {
 		$usage_data = array();
 
 		foreach ( $provider_slugs as $slug ) {
-			$usage_key = 'accessdefender_usage_' . $slug . '_' . date( 'Y-m' );
+			$usage_key = 'accessdefender_usage_' . $slug . '_' . gmdate( 'Y-m' );
 			$usage_data[ $slug ] = get_option( $usage_key, 0 );
 		}
 
@@ -253,7 +253,7 @@ class ApiProviderManager {
 			return false;
 		}
 
-		$usage_key = 'accessdefender_usage_' . $provider_slug . '_' . date( 'Y-m' );
+		$usage_key = 'accessdefender_usage_' . $provider_slug . '_' . gmdate( 'Y-m' );
 		$current_usage = get_option( $usage_key, 0 );
 
 		// Allow 10% buffer before hard limit

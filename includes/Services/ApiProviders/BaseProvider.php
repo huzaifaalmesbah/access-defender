@@ -137,7 +137,7 @@ abstract class BaseProvider implements ApiProviderInterface {
 	 */
 	protected function log_usage( bool $success ): void {
 		// Monthly usage tracking
-		$usage_key = $this->cache_prefix . 'usage_' . $this->get_slug() . '_' . date( 'Y-m' );
+		$usage_key = $this->cache_prefix . 'usage_' . $this->get_slug() . '_' . gmdate( 'Y-m' );
 		$usage     = get_option( $usage_key, 0 );
 		$usage++;
 		update_option( $usage_key, $usage );
@@ -145,7 +145,7 @@ abstract class BaseProvider implements ApiProviderInterface {
 		// Per-minute usage tracking for rate limiting
 		// Only track minute-level counters for free providers (e.g., IP-API free)
 		if ( method_exists( $this, 'is_free' ) && $this->is_free() ) {
-			$minute_key   = $this->cache_prefix . 'minute_' . $this->get_slug() . '_' . date( 'Y-m-d-H-i' );
+			$minute_key   = $this->cache_prefix . 'minute_' . $this->get_slug() . '_' . gmdate( 'Y-m-d-H-i' );
 			$minute_usage = get_option( $minute_key, 0 );
 			$minute_usage++;
 			update_option( $minute_key, $minute_usage, 120 ); // Expire after 2 minutes
@@ -170,7 +170,7 @@ abstract class BaseProvider implements ApiProviderInterface {
 	 * @return array Usage statistics
 	 */
 	public function get_usage_stats(): array {
-		$usage_key = $this->cache_prefix . 'usage_' . $this->get_slug() . '_' . date( 'Y-m' );
+		$usage_key = $this->cache_prefix . 'usage_' . $this->get_slug() . '_' . gmdate( 'Y-m' );
 		$stats_key = $this->cache_prefix . 'stats_' . $this->get_slug();
 
 		$usage = get_option( $usage_key, 0 );
@@ -203,7 +203,7 @@ abstract class BaseProvider implements ApiProviderInterface {
 			return false; // No limit
 		}
 
-		$minute_key   = $this->cache_prefix . 'minute_' . $this->get_slug() . '_' . date( 'Y-m-d-H-i' );
+		$minute_key   = $this->cache_prefix . 'minute_' . $this->get_slug() . '_' . gmdate( 'Y-m-d-H-i' );
 		$minute_usage = get_option( $minute_key, 0 );
 
 		return $minute_usage >= $minute_limit;

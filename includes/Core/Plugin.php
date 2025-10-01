@@ -197,7 +197,7 @@ class Plugin implements PluginInterface {
 	 */
 	public function ajax_validate_api_key(): void {
 		// Verify nonce
-		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'accessdefender_admin_nonce' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'accessdefender_admin_nonce' ) ) {
 			wp_send_json_error( 'Invalid nonce' );
 			return;
 		}
@@ -208,8 +208,8 @@ class Plugin implements PluginInterface {
 			return;
 		}
 
-		$provider = sanitize_text_field( $_POST['provider'] ?? '' );
-		$api_key  = sanitize_text_field( $_POST['api_key'] ?? '' );
+		$provider = sanitize_text_field( wp_unslash( $_POST['provider'] ?? '' ) );
+		$api_key  = sanitize_text_field( wp_unslash( $_POST['api_key'] ?? '' ) );
 
 		$api_manager = new ApiProviderManager();
 		$is_valid    = $api_manager->validate_api_key( $provider, $api_key );
@@ -225,7 +225,7 @@ class Plugin implements PluginInterface {
 	 */
 	public function ajax_provider_status(): void {
 		// Verify nonce
-		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'accessdefender_admin_nonce' ) ) {
+		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ?? '' ) ), 'accessdefender_admin_nonce' ) ) {
 			wp_send_json_error( 'Invalid nonce' );
 			return;
 		}

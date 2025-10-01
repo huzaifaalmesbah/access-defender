@@ -90,7 +90,7 @@ class BotDetector {
 			return false;
 		}
 
-		$user_agent = strtolower( $_SERVER['HTTP_USER_AGENT'] );
+		$user_agent = strtolower( sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) );
 		$ip         = $this->ip_detector->get_client_ip();
 
 		if ( $this->is_google_ip( $ip ) && $this->verify_google_bot( $ip ) ) {

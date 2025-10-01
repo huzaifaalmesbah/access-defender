@@ -149,31 +149,31 @@ class AdminPage {
 		// Process core settings
 		$core_input = array();
 		if ( isset( $_POST['accessdefender_core_settings'] ) ) {
-			$core_input = $_POST['accessdefender_core_settings'];
+			$core_input = map_deep( wp_unslash( $_POST['accessdefender_core_settings'] ), 'sanitize_text_field' );
 		}
 		
 		// Handle individual core fields that might not be in the array
 		if ( isset( $_POST['enable_vpn_blocking'] ) ) {
-			$core_input['enable_vpn_blocking'] = $_POST['enable_vpn_blocking'];
+			$core_input['enable_vpn_blocking'] = sanitize_text_field( wp_unslash( $_POST['enable_vpn_blocking'] ) );
 		}
 		if ( isset( $_POST['warning_title'] ) ) {
-			$core_input['warning_title'] = $_POST['warning_title'];
+			$core_input['warning_title'] = sanitize_text_field( wp_unslash( $_POST['warning_title'] ) );
 		}
 		if ( isset( $_POST['warning_message'] ) ) {
-			$core_input['warning_message'] = $_POST['warning_message'];
+			$core_input['warning_message'] = sanitize_textarea_field( wp_unslash( $_POST['warning_message'] ) );
 		}
 
 		// Process provider settings
 		$provider_input = array();
 		if ( isset( $_POST['accessdefender_provider_settings'] ) ) {
-			$provider_input = $_POST['accessdefender_provider_settings'];
+			$provider_input = map_deep( wp_unslash( $_POST['accessdefender_provider_settings'] ), 'sanitize_text_field' );
 		}
 
 		// Handle individual provider fields
 		$provider_fields = array( 'provider_mode', 'free_providers', 'paid_provider', 'api_keys' );
 		foreach ( $provider_fields as $field ) {
 			if ( isset( $_POST[ $field ] ) ) {
-				$provider_input[ $field ] = $_POST[ $field ];
+				$provider_input[ $field ] = map_deep( wp_unslash( $_POST[ $field ] ), 'sanitize_text_field' );
 			}
 		}
 

@@ -50,7 +50,7 @@ class IpDetector {
 				continue;
 			}
 
-			$ip = trim( $_SERVER[ $header ] );
+			$ip = trim( sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) ) );
 			if ( empty( $ip ) ) {
 				continue;
 			}
