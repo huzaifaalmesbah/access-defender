@@ -20,8 +20,10 @@ define( 'ACCESS_DEFENDER_FILE', __FILE__ );
 define( 'ACCESS_DEFENDER_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ACCESS_DEFENDER_URL', plugin_dir_url( __FILE__ ) );
 
-// Load Composer autoloader.
-require_once ACCESS_DEFENDER_PATH . 'vendor/autoload.php';
+// Load Composer autoloader if it exists.
+if ( file_exists( ACCESS_DEFENDER_PATH . 'vendor/autoload.php' ) ) {
+	require_once ACCESS_DEFENDER_PATH . 'vendor/autoload.php';
+}
 
 // Load our custom autoloader for new v1.1.0 classes
 spl_autoload_register( function ( $class ) {
