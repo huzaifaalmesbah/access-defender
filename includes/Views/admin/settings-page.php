@@ -43,7 +43,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 						
 						<?php do_settings_sections( 'access-defender' ); ?>
 						
-						<h3>Provider Settings</h3>
 						<?php do_settings_sections( 'access-defender-providers' ); ?>
 						
 						<?php submit_button( 'Save Settings', 'primary access-defender-submit', 'submit', true ); ?>
@@ -52,7 +51,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 				
 				<!-- About Tab -->
 				<div id="about-tab" class="tab-pane">
-					<?php require_once ACCESS_DEFENDER_PATH . 'includes/Views/admin/settings-sidebar.php'; ?>
+					<?php require_once ACCESS_DEFENDER_PATH . 'includes/Views/admin/settings-about.php'; ?>
 				</div>
 			</div>
 		</div>

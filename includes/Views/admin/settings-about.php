@@ -1,6 +1,6 @@
 <?php
 /**
- * Sidebar template for Access Defender settings page
+ * About template for Access Defender settings page
  *
  * @package AccessDefender
  * @since 1.0.2
@@ -50,7 +50,7 @@ if ( false === $profile ) {
 
 <div class="access-defender-about">
 	<?php if ( $profile ) : ?>
-		<div class="sidebar-section developer-profile">
+		<div class="about-section developer-profile">
 			<h3><?php esc_html_e( 'Developer Profile', 'access-defender' ); ?></h3>
 
 			<!-- Profile Image -->
@@ -134,7 +134,7 @@ if ( false === $profile ) {
 		</div>
 
 		<!-- Quick Links Section -->
-		<div class="sidebar-section">
+		<div class="about-section">
 			<h3><?php esc_html_e( 'Quick Links', 'access-defender' ); ?></h3>
 			<div class="quick-links">
 				<a href="https://wordpress.org/plugins/access-defender/#description" 

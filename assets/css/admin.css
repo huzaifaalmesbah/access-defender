@@ -10,7 +10,7 @@
     flex-direction: column;
 }
 
-.access-defender-container .access-defender-sidebar {
+.access-defender-container .access-defender-about {
     flex: 1 1 35%;
     min-width: 250px;
     display: flex;
@@ -90,7 +90,7 @@
 }
 
 .access-defender-container .access-defender-main .access-defender-card:last-child,
-.access-defender-container .access-defender-sidebar .access-defender-card:last-child {
+.access-defender-container .access-defender-about .access-defender-card:last-child {
     margin-bottom: 0;
     height: 100%;
 }
@@ -559,7 +559,7 @@
     }
     
     .access-defender-container .access-defender-main,
-    .access-defender-container .access-defender-sidebar {
+    .access-defender-container .access-defender-about {
         flex: 1 1 100%;
     }
     
