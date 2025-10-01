@@ -4,7 +4,7 @@ Tags: security, firewall, spam, privacy, protection
 Requires at least: 5.9
 Tested up to: 6.8
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -195,6 +195,9 @@ We provide comprehensive support:
 
 == Changelog ==
 
+= 1.1.1 =
+* Fixed: VPN blocking setting not saving when disabled
+
 = 1.1.0 =
 * Added: Multiple API provider support (6 free + 4 premium providers)
 * Added: Smart auto-rotation system for free providers
@@ -225,7 +228,7 @@ We provide comprehensive support:
 
 == Upgrade Notice ==
 
-= 1.1.0 =
+= 1.1.1 =
 Major update with multiple API providers and auto-rotation! Your existing settings will be automatically migrated. New features include real-time dashboard, enhanced detection accuracy, and smart provider management.
 
 = 1.0.2 =

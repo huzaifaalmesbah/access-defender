@@ -153,9 +153,9 @@ class AdminPage {
 		}
 		
 		// Handle individual core fields that might not be in the array
-		if ( isset( $_POST['enable_vpn_blocking'] ) ) {
-			$core_input['enable_vpn_blocking'] = sanitize_text_field( wp_unslash( $_POST['enable_vpn_blocking'] ) );
-		}
+		// For checkboxes, we need to always set the value (1 if checked, 0 if not)
+		$core_input['enable_vpn_blocking'] = isset( $_POST['enable_vpn_blocking'] ) ? sanitize_text_field( wp_unslash( $_POST['enable_vpn_blocking'] ) ) : '0';
+		
 		if ( isset( $_POST['warning_title'] ) ) {
 			$core_input['warning_title'] = sanitize_text_field( wp_unslash( $_POST['warning_title'] ) );
 		}
@@ -782,8 +782,8 @@ class AdminPage {
 		$existing = get_option( 'accessdefender_core_settings', array() );
 		$sanitized = $existing;
 
-		// Handle checkbox fields - if not present in input, it means unchecked
-		$sanitized['enable_vpn_blocking'] = isset( $input['enable_vpn_blocking'] ) ? '1' : '0';
+		// Handle checkbox fields - check the actual value, not just presence
+		$sanitized['enable_vpn_blocking'] = ( isset( $input['enable_vpn_blocking'] ) && '1' === $input['enable_vpn_blocking'] ) ? '1' : '0';
 
 		if ( isset( $input['warning_title'] ) ) {
 			$sanitized['warning_title'] = sanitize_text_field( $input['warning_title'] );
