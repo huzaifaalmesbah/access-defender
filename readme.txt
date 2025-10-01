@@ -18,29 +18,29 @@ Advanced VPN & proxy blocker for WordPress. 99.9% accuracy, multi-API rotation, 
 
 === Key Features ===
 
-** Advanced VPN & Proxy Detection**
+**Advanced VPN & Proxy Detection**
 * **99.9% Detection Accuracy** - Industry-leading precision in identifying VPNs, proxies, and hosting providers
 * **Multiple Detection Methods** - Comprehensive IP analysis using advanced algorithms
 * **Real-time Threat Assessment** - Instant blocking of suspicious traffic
 
-** Multi-Provider System (NEW!)**
+**Multi-Provider System (NEW!)**
 * **4+ API Providers** - Choose from free and premium services
 * **Smart Auto-Rotation** - Automatic switching between providers when limits are reached
 * **Zero Downtime Protection** - Seamless failover ensures continuous security
 * **Load Balancing** - Distribute requests across multiple providers for optimal performance
 
-** Real-time Monitoring & Analytics**
+**Real-time Monitoring & Analytics**
 * **Live Usage Statistics** - Monitor API calls, success rates, and provider performance
 * **Detailed Reporting** - Track blocked attempts, provider efficiency, and security metrics
 * **Performance Insights** - Optimize your security setup with actionable data
 
-** Smart Configuration Options**
+**Smart Configuration Options**
 * **Free Provider Auto-Rotation** - Perfect for small to medium websites
 * **Premium Provider Support** - Enhanced reliability for high-traffic sites
 * **Flexible API Management** - Easy switching between providers
 * **Custom Rate Limiting** - Intelligent request management
 
-** User-Friendly Features**
+**User-Friendly Features**
 * **One-Click Setup** - Get protected in minutes
 * **Customizable Block Messages** - Professional warning pages for blocked users
 * **Admin Bypass** - Administrators never get blocked
@@ -188,13 +188,13 @@ We provide comprehensive support:
 * **Dynamic API Management** - Easy provider switching and key validation
 * **Enhanced Admin Interface** - Redesigned dashboard with better UX
 
-** Improvements:**
+**Improvements:**
 * **Better Error Handling** - Robust fallback systems
 * **Optimized Performance** - Faster response times and reduced resource usage
 * **Smart Rate Limiting** - Per-minute and monthly usage tracking
 * **Organized Code Structure** - Cleaner provider architecture
 
-** Bug Fixes:**
+**Bug Fixes:**
 * Fixed plugin options migration system
 * Improved uninstall process
 * Enhanced compatibility with latest WordPress versions
@@ -273,7 +273,7 @@ Access Defender is licensed under **GPLv2 or later**. This ensures the plugin re
 
 == Terms of Use & Disclaimer ==
 
-** Important Legal Information:**
+**Important Legal Information:**
 
 Access Defender is provided "as-is" without warranty of any kind. While we strive to provide the highest level of security and reliability:
 
@@ -282,7 +282,7 @@ Access Defender is provided "as-is" without warranty of any kind. While we striv
 * **Service Availability:** API provider changes may affect functionality
 * **User Responsibility:** Proper configuration and monitoring are essential
 
-** Best Practices:**
+**Best Practices:**
 * Regularly monitor plugin performance
 * Keep plugin updated to latest version
 * Test configuration on staging environment
