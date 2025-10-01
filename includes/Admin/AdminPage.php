@@ -1,10 +1,10 @@
 <?php
 /**
- * Admin page class for Access Defender plugin
+ * Admin Page class for Access Defender plugin
  *
  * Handles rendering of the settings page and saving of options
  *
- * @package AccessDefender
+ * @package AccessDefender\Admin
  * @since 1.0.1
  */
 
@@ -15,14 +15,18 @@ namespace AccessDefender\Admin;
  *
  * Handles rendering of the settings page and saving of options
  *
- * @package AccessDefender
+ * @package AccessDefender\Admin
  * @since 1.0.1
  */
 class AdminPage {
 	/**
 	 * The options for the Access Defender plugin
 	 *
-	 * @since 1.0.1
+	 * @si						<input type="checkbox" 
+							   name="<?php echo esc_attr( $field ); ?>[]" 
+							   value="<?php echo esc_attr( $slug ); ?>"
+							   <?php checked( in_array( $slug, $value, true ) ); ?>
+							   style="margin-right: 8px;">.0.1
 	 * @var array
 	 *  @access private
 	 */
@@ -33,7 +37,13 @@ class AdminPage {
 	 *
 	 * @since 1.1.0
 	 * @var array
-	 * @access private
+	 * 				<input type="password" 
+					   name="<?php echo esc_attr( $field ); ?>[<?php echo esc_attr( $slug ); ?>]" 
+					   value="<?php echo esc_attr( $value[ $slug ] ?? '' ); ?>" 
+					   class="regular-text api-key-input" 
+					   style="width: 100%;"
+					   data-provider="<?php echo esc_attr( $slug ); ?>"
+					   placeholder="Enter your <?php echo esc_attr( $provider->get_name() ); ?> API key"> private
 	 */
 	private $core_settings;
 
@@ -56,6 +66,110 @@ class AdminPage {
 	public function init(): void {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'init_settings' ) );
+		add_action( 'admin_init', array( $this, 'handle_form_submission' ) );
+		
+		// Add debug endpoint for development
+		add_action( 'wp_ajax_debug_access_defender_options', array( $this, 'debug_options' ) );
+	}
+	
+	/**
+	 * Debug endpoint to check options
+	 * 
+	 * @since 1.1.0
+	 */
+	public function debug_options(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Unauthorized' );
+		}
+		
+		$core_settings = get_option( 'accessdefender_core_settings', 'NOT FOUND' );
+		$provider_settings = get_option( 'accessdefender_provider_settings', 'NOT FOUND' );
+		
+		echo '<h3>Debug Access Defender Options</h3>';
+		echo '<h4>Core Settings:</h4>';
+		echo '<pre>' . print_r( $core_settings, true ) . '</pre>';
+		echo '<h4>Provider Settings:</h4>';
+		echo '<pre>' . print_r( $provider_settings, true ) . '</pre>';
+		
+		wp_die();
+	}
+
+	/**
+	 * Handle custom form submission for both option groups
+	 *
+	 * @since 1.1.0
+	 */
+	public function handle_form_submission(): void {
+		// Check if our form was submitted
+		if ( ! isset( $_POST['action'] ) || $_POST['action'] !== 'accessdefender_save_settings' ) {
+			return;
+		}
+
+		// Verify nonce
+		if ( ! isset( $_POST['accessdefender_nonce'] ) || ! wp_verify_nonce( $_POST['accessdefender_nonce'], 'accessdefender_save_settings' ) ) {
+			wp_die( 'Security check failed' );
+		}
+
+		// Check user permissions
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( 'Insufficient permissions' );
+		}
+
+		// Process core settings
+		$core_input = array();
+		if ( isset( $_POST['accessdefender_core_settings'] ) ) {
+			$core_input = $_POST['accessdefender_core_settings'];
+		}
+		
+		// Handle individual core fields that might not be in the array
+		if ( isset( $_POST['enable_vpn_blocking'] ) ) {
+			$core_input['enable_vpn_blocking'] = $_POST['enable_vpn_blocking'];
+		}
+		if ( isset( $_POST['warning_title'] ) ) {
+			$core_input['warning_title'] = $_POST['warning_title'];
+		}
+		if ( isset( $_POST['warning_message'] ) ) {
+			$core_input['warning_message'] = $_POST['warning_message'];
+		}
+
+		// Process provider settings
+		$provider_input = array();
+		if ( isset( $_POST['accessdefender_provider_settings'] ) ) {
+			$provider_input = $_POST['accessdefender_provider_settings'];
+		}
+
+		// Handle individual provider fields
+		$provider_fields = array( 'provider_mode', 'free_providers', 'paid_provider', 'api_keys' );
+		foreach ( $provider_fields as $field ) {
+			if ( isset( $_POST[ $field ] ) ) {
+				$provider_input[ $field ] = $_POST[ $field ];
+			}
+		}
+
+		// Sanitize and save core settings
+		if ( ! empty( $core_input ) ) {
+			$sanitized_core = $this->sanitize_core_settings( $core_input );
+			update_option( 'accessdefender_core_settings', $sanitized_core );
+		}
+
+		// Sanitize and save provider settings  
+		if ( ! empty( $provider_input ) ) {
+			$sanitized_provider = $this->sanitize_provider_settings( $provider_input );
+			update_option( 'accessdefender_provider_settings', $sanitized_provider );
+		}
+
+		// Add success notice
+		add_settings_error(
+			'accessdefender_messages',
+			'accessdefender_message',
+			'Settings saved successfully!',
+			'success'
+		);
+
+		// Redirect to prevent resubmission
+		$redirect_url = add_query_arg( 'settings-updated', 'true', wp_get_referer() );
+		wp_redirect( $redirect_url );
+		exit;
 	}
 
 	/**
@@ -74,31 +188,24 @@ class AdminPage {
 	}
 
 	/**
-	 * Renders the settings page for Access Defender
+	 * Render the admin page
 	 *
 	 * @since 1.0.1
 	 */
 	public function render_admin_page(): void {
-		// Load new options structure
-		$this->core_settings     = get_option( 'accessdefender_core_settings', array() );
-		$this->provider_settings = get_option( 'accessdefender_provider_settings', array() );
-		
-		// If migration to new structured options is complete, remove legacy option to avoid confusion
-		$legacy_exists = get_option( 'accessdefender_options', null );
-		if ( null !== $legacy_exists ) {
-			$has_core     = is_array( $this->core_settings ) && ! empty( $this->core_settings );
-			$has_provider = is_array( $this->provider_settings ) && ! empty( $this->provider_settings );
-			if ( $has_core && $has_provider ) {
-				// Safe to remove legacy option now that both new buckets exist
-				delete_option( 'accessdefender_options' );
-			}
-		}
-		
-		// Load legacy options for backward compatibility and merge with new structure
-		$legacy_options = get_option( 'accessdefender_options', array() );
-		$this->options = array_merge( $this->core_settings, $this->provider_settings, $legacy_options );
-		
+		$this->load_options();
 		require_once ACCESS_DEFENDER_PATH . 'includes/Views/admin/settings-page.php';
+	}
+
+	/**
+	 * Load plugin options
+	 *
+	 * @since 1.1.0
+	 */
+	private function load_options(): void {
+		$this->core_settings = get_option( 'accessdefender_core_settings', array() );
+		$this->provider_settings = get_option( 'accessdefender_provider_settings', array() );
+		$this->options = array_merge( $this->core_settings, $this->provider_settings );
 	}
 
 	/**
@@ -111,31 +218,32 @@ class AdminPage {
 	 * @since 1.0.1
 	 */
 	public function init_settings(): void {
-		// Register new options structure
+		// Register option groups for the new structure
 		register_setting(
-			'accessdefender_options',
 			'accessdefender_core_settings',
-			array( $this, 'sanitize_core_settings' )
+			'accessdefender_core_settings',
+			array( $this, 'validate_core_settings' )
 		);
 		
 		register_setting(
-			'accessdefender_options',
+			'accessdefender_provider_settings', 
 			'accessdefender_provider_settings',
-			array( $this, 'sanitize_provider_settings' )
+			array( $this, 'validate_provider_settings' )
 		);
 		
-		// Keep legacy registration for backward compatibility
-		register_setting(
-			'accessdefender_options',
-			'accessdefender_options',
-			array( $this, 'sanitize_options' )
-		);
-
+		// Add settings sections
 		add_settings_section(
 			'main_section',
 			'General Settings',
 			null,
 			'access-defender'
+		);
+
+		add_settings_section(
+			'provider_section',
+			'Provider Settings', 
+			null,
+			'access-defender-providers'
 		);
 
 		$this->add_settings_fields();
@@ -156,6 +264,7 @@ class AdminPage {
 	 * @updated 1.1.0 - Added API provider settings
 	 */
 	private function add_settings_fields(): void {
+		// Core settings fields
 		add_settings_field(
 			'enable_vpn_blocking',
 			'Enable VPN Blocking',
@@ -163,42 +272,6 @@ class AdminPage {
 			'access-defender',
 			'main_section',
 			array( 'enable_vpn_blocking' )
-		);
-
-		add_settings_field(
-			'provider_mode',
-			'Provider Configuration',
-			array( $this, 'render_provider_mode_field' ),
-			'access-defender',
-			'main_section',
-			array( 'provider_mode' )
-		);
-
-		add_settings_field(
-			'free_providers',
-			'<span class="free-providers-header" style="display: none;">Free Providers (Auto-Rotation)</span>',
-			array( $this, 'render_free_providers_field' ),
-			'access-defender',
-			'main_section',
-			array( 'free_providers' )
-		);
-
-		add_settings_field(
-			'paid_provider',
-			'<span class="paid-providers-header" style="display: none;">Paid Provider Selection</span>',
-			array( $this, 'render_paid_provider_field' ),
-			'access-defender',
-			'main_section',
-			array( 'paid_provider' )
-		);
-
-		add_settings_field(
-			'api_keys',
-			'API Keys',
-			array( $this, 'render_dynamic_api_keys_field' ),
-			'access-defender',
-			'main_section',
-			array( 'api_keys' )
 		);
 
 		add_settings_field(
@@ -218,6 +291,43 @@ class AdminPage {
 			'main_section',
 			array( 'warning_message' )
 		);
+
+		// Provider settings fields
+		add_settings_field(
+			'provider_mode',
+			'Provider Configuration',
+			array( $this, 'render_provider_mode_field' ),
+			'access-defender-providers',
+			'provider_section',
+			array( 'provider_mode' )
+		);
+
+		add_settings_field(
+			'free_providers',
+			'<span class="free-providers-header" style="display: none;">Free Providers (Auto-Rotation)</span>',
+			array( $this, 'render_free_providers_field' ),
+			'access-defender-providers',
+			'provider_section',
+			array( 'free_providers' )
+		);
+
+		add_settings_field(
+			'paid_provider',
+			'<span class="paid-providers-header" style="display: none;">Paid Provider Selection</span>',
+			array( $this, 'render_paid_provider_field' ),
+			'access-defender-providers',
+			'provider_section',
+			array( 'paid_provider' )
+		);
+
+		add_settings_field(
+			'api_keys',
+			'API Keys',
+			array( $this, 'render_dynamic_api_keys_field' ),
+			'access-defender-providers',
+			'provider_section',
+			array( 'api_keys' )
+		);
 	}
 
 	/**
@@ -232,7 +342,7 @@ class AdminPage {
 		?>
 	<label class="switch">
 		<input type="checkbox" 
-				name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
+				name="<?php echo esc_attr( $field ); ?>" 
 				value="1" 
 				<?php echo esc_attr( $checked ); ?>>
 		<span class="slider round"></span>
@@ -250,7 +360,7 @@ class AdminPage {
 		$field = $args[0];
 		$value = $this->options[ $field ] ?? '';
 		?>
-		<input type="text" name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
+		<input type="text" name="<?php echo esc_attr( $field ); ?>" 
 				value="<?php echo esc_attr( $value ); ?>" class="regular-text" style="width: 100%;">
 		<?php
 	}
@@ -264,12 +374,15 @@ class AdminPage {
 	public function render_textarea_field( $args ): void {
 		$field = $args[0];
 		$value = $this->options[ $field ] ?? '';
+		
+		// Remove extra backslashes when displaying the value
+		$value = stripslashes( $value );
 
 		wp_editor(
 			$value,
 			'accessdefender_' . $field,
 			array(
-				'textarea_name' => 'accessdefender_options[' . $field . ']',
+				'textarea_name' => $field,
 				'textarea_rows' => 2,
 				'editor_class'  => 'regular-text',
 				'media_buttons' => false,
@@ -293,7 +406,7 @@ class AdminPage {
 		<div class="provider-mode-selection">
 			<label style="display: block; margin-bottom: 15px;">
 				<input type="radio" 
-					   name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
+					   name="<?php echo esc_attr( $field ); ?>" 
 					   value="free" 
 					   <?php checked( $value, 'free' ); ?>
 					   class="provider-mode-radio">
@@ -301,7 +414,7 @@ class AdminPage {
 			</label>
 			<label style="display: block; margin-bottom: 15px;">
 				<input type="radio" 
-					   name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
+					   name="<?php echo esc_attr( $field ); ?>" 
 					   value="paid" 
 					   <?php checked( $value, 'paid' ); ?>
 					   class="provider-mode-radio">
@@ -340,7 +453,7 @@ class AdminPage {
 						<div class="provider-card <?php echo in_array( $slug, $value, true ) ? 'selected' : ''; ?>">
 							<label style="cursor: pointer; display: block;">
 								<input type="checkbox" 
-									   name="accessdefender_options[<?php echo esc_attr( $field ); ?>][]" 
+									   name="<?php echo esc_attr( $field ); ?>[]" 
 									   value="<?php echo esc_attr( $slug ); ?>"
 									   <?php checked( in_array( $slug, $value, true ) ); ?>
 									   style="margin-right: 8px;">
@@ -401,7 +514,7 @@ class AdminPage {
 				<div class="provider-card <?php echo $value === $slug ? 'selected' : ''; ?> <?php echo $is_enabled ? '' : 'disabled'; ?>">
 					<label style="cursor: <?php echo $is_enabled ? 'pointer' : 'not-allowed'; ?>; display: block; opacity: <?php echo $is_enabled ? '1' : '0.6'; ?>;">
 								<input type="radio" 
-									   name="accessdefender_options[<?php echo esc_attr( $field ); ?>]" 
+									   name="<?php echo esc_attr( $field ); ?>" 
 									   value="<?php echo esc_attr( $slug ); ?>"
 									   <?php checked( $value, $slug ); ?>
 							   <?php echo $is_enabled ? '' : 'disabled'; ?>
@@ -481,7 +594,7 @@ class AdminPage {
 							<?php endif; ?>
 						</label>
 						<input type="password" 
-							   name="accessdefender_options[<?php echo esc_attr( $field ); ?>][<?php echo esc_attr( $slug ); ?>]" 
+							   name="<?php echo esc_attr( $field ); ?>[<?php echo esc_attr( $slug ); ?>]" 
 							   value="<?php echo esc_attr( $value[ $slug ] ?? '' ); ?>" 
 							   class="regular-text api-key-input" 
 							   style="width: 100%;"
@@ -510,106 +623,41 @@ class AdminPage {
 	}
 
 	/**
-	 * Sanitizes the Access Defender plugin options.
+	 * Validate core settings
 	 *
-	 * The function filters the input options array to ensure that only the
-	 * expected options are processed. It also sanitizes the values of the
-	 * options using the proper WordPress sanitization functions.
-	 *
-	 * @param array $input The options input array.
-	 *
-	 * @return array The sanitized options array.
-	 * @updated 1.1.0 - Added API provider options sanitization
+	 * @param array $input Input values to validate.
+	 * @return array Validated values.
+	 * @since 1.1.0
 	 */
-	public function sanitize_options( $input ): array {
-		$sanitized                        = array();
-		$sanitized['enable_vpn_blocking'] = isset( $input['enable_vpn_blocking'] ) ? '1' : '0';
-		$sanitized['provider_mode']       = sanitize_text_field( $input['provider_mode'] ?? 'free' );
-		$sanitized['free_providers']      = isset( $input['free_providers'] ) ? array_map( 'sanitize_text_field', $input['free_providers'] ) : array( 'ip-api' );
-		$sanitized['paid_provider']       = sanitize_text_field( $input['paid_provider'] ?? '' );
-		$sanitized['warning_title']       = sanitize_text_field( $input['warning_title'] ?? '' );
-		$sanitized['warning_message']     = wp_kses_post( $input['warning_message'] ?? '' );
+	public function validate_core_settings( $input ): array {
+		// Add debugging
+		error_log( 'Access Defender: validate_core_settings called with input: ' . print_r( $input, true ) );
 		
-		// Sanitize API keys
-		$sanitized['api_keys'] = array();
-		if ( isset( $input['api_keys'] ) && is_array( $input['api_keys'] ) ) {
-			foreach ( $input['api_keys'] as $provider => $key ) {
-				$sanitized['api_keys'][ sanitize_text_field( $provider ) ] = sanitize_text_field( $key );
-			}
-		}
+		$sanitized = $this->sanitize_core_settings( $input );
 		
-		// Validate required selections when VPN blocking enabled
-		if ( $sanitized['enable_vpn_blocking'] === '1' ) {
-			if ( $sanitized['provider_mode'] === 'free' ) {
-				if ( empty( $sanitized['free_providers'] ) ) {
-					$sanitized['free_providers'] = array( 'ip-api' );
-					if ( function_exists( 'add_settings_error' ) ) {
-						add_settings_error( 'accessdefender_options', 'accessdefender_no_free_providers', __( 'Please select at least one free provider. We selected IP-API for you.', 'access-defender' ), 'error' );
-					}
-				}
-			} else {
-				if ( empty( $sanitized['paid_provider'] ) ) {
-					// Fallback to free provider when paid not selected
-					$sanitized['provider_mode']  = 'free';
-					$sanitized['free_providers'] = array( 'ip-api' );
-					if ( function_exists( 'add_settings_error' ) ) {
-						add_settings_error( 'accessdefender_options', 'accessdefender_no_paid_provider', __( 'Please select an active paid provider and provide a valid API key. Falling back to free provider.', 'access-defender' ), 'error' );
-					}
-				} else {
-					// Validate API key for selected paid provider; fallback to free if invalid
-					$api_key = $sanitized['api_keys'][ $sanitized['paid_provider'] ] ?? '';
-					if ( empty( $api_key ) ) {
-						$sanitized['provider_mode']  = 'free';
-						$sanitized['free_providers'] = array( 'ip-api' );
-						if ( function_exists( 'add_settings_error' ) ) {
-							add_settings_error( 'accessdefender_options', 'accessdefender_invalid_api_key', __( 'Please select an active paid provider and provide a valid API key. Falling back to free provider.', 'access-defender' ), 'error' );
-						}
-					} else {
-						// Use provider manager to validate key remotely
-						$provider_manager = new \AccessDefender\Services\ApiProviderManager();
-						if ( ! $provider_manager->validate_api_key( $sanitized['paid_provider'], $api_key ) ) {
-							$sanitized['provider_mode']  = 'free';
-							$sanitized['free_providers'] = array( 'ip-api' );
-							if ( function_exists( 'add_settings_error' ) ) {
-								add_settings_error( 'accessdefender_options', 'accessdefender_invalid_api_key', __( 'Please select an active paid provider and provide a valid API key. Falling back to free provider.', 'access-defender' ), 'error' );
-							}
-						}
-					}
-				}
-			}
-		}
-
-		// Set backward compatibility fields based on (possibly adjusted) mode
-		if ( $sanitized['provider_mode'] === 'free' ) {
-			$sanitized['primary_provider'] = 'ip-api';
-			$sanitized['active_providers'] = $sanitized['free_providers'];
-		} else {
-			$sanitized['primary_provider'] = $sanitized['paid_provider'];
-			$sanitized['active_providers'] = array( $sanitized['paid_provider'] );
-		}
+		// Add debugging
+		error_log( 'Access Defender: validate_core_settings returning: ' . print_r( $sanitized, true ) );
 		
-		// Persist to new structured options as well for v1.1.0+
-		$core_settings = array(
-			'enable_vpn_blocking' => $sanitized['enable_vpn_blocking'] ?? '0',
-			'warning_title'       => $sanitized['warning_title'] ?? '',
-			'warning_message'     => $sanitized['warning_message'] ?? '',
+		// Add admin notice to confirm saving
+		add_settings_error(
+			'accessdefender_core_settings',
+			'settings_saved',
+			'Core settings saved successfully!',
+			'success'
 		);
-
-		$provider_settings = array(
-			'provider_mode'    => $sanitized['provider_mode'] ?? 'free',
-			'free_providers'   => $sanitized['free_providers'] ?? array( 'ip-api' ),
-			'paid_provider'    => $sanitized['paid_provider'] ?? '',
-			'primary_provider' => $sanitized['primary_provider'] ?? ( ( $sanitized['provider_mode'] ?? 'free' ) === 'free' ? 'ip-api' : ( $sanitized['paid_provider'] ?? '' ) ),
-			'active_providers' => $sanitized['active_providers'] ?? ( ( $sanitized['provider_mode'] ?? 'free' ) === 'free' ? ( $sanitized['free_providers'] ?? array( 'ip-api' ) ) : ( isset( $sanitized['paid_provider'] ) ? array( $sanitized['paid_provider'] ) : array() ) ),
-			'api_keys'         => $sanitized['api_keys'] ?? array(),
-		);
-
-		// Update both new option buckets to keep them in sync
-		update_option( 'accessdefender_core_settings', $core_settings );
-		update_option( 'accessdefender_provider_settings', $provider_settings );
-
-		// Return legacy combined array for backward compatibility
+		
 		return $sanitized;
+	}
+
+	/**
+	 * Validate provider settings
+	 *
+	 * @param array $input Input values to validate.
+	 * @return array Validated values.
+	 * @since 1.1.0
+	 */
+	public function validate_provider_settings( $input ): array {
+		return $this->sanitize_provider_settings( $input );
 	}
 
 	/**
@@ -620,18 +668,20 @@ class AdminPage {
 	 * @since 1.1.0
 	 */
 	public function sanitize_core_settings( $input ): array {
-		$sanitized = array();
+		// Get existing settings to preserve values not in current form submission
+		$existing = get_option( 'accessdefender_core_settings', array() );
+		$sanitized = $existing;
 
-		if ( isset( $input['enable_vpn_blocking'] ) ) {
-			$sanitized['enable_vpn_blocking'] = sanitize_text_field( $input['enable_vpn_blocking'] );
-		}
+		// Handle checkbox fields - if not present in input, it means unchecked
+		$sanitized['enable_vpn_blocking'] = isset( $input['enable_vpn_blocking'] ) ? '1' : '0';
 
 		if ( isset( $input['warning_title'] ) ) {
 			$sanitized['warning_title'] = sanitize_text_field( $input['warning_title'] );
 		}
 
 		if ( isset( $input['warning_message'] ) ) {
-			$sanitized['warning_message'] = wp_kses_post( $input['warning_message'] );
+			// Use stripslashes to remove any extra backslashes before sanitizing
+			$sanitized['warning_message'] = wp_kses_post( stripslashes( $input['warning_message'] ) );
 		}
 
 		if ( isset( $input['version'] ) ) {
@@ -641,6 +691,10 @@ class AdminPage {
 		if ( isset( $input['installed_date'] ) ) {
 			$sanitized['installed_date'] = sanitize_text_field( $input['installed_date'] );
 		}
+
+		// Add debugging
+		error_log( 'Access Defender: sanitize_core_settings input: ' . print_r( $input, true ) );
+		error_log( 'Access Defender: sanitize_core_settings sanitized: ' . print_r( $sanitized, true ) );
 
 		return $sanitized;
 	}
@@ -693,5 +747,22 @@ class AdminPage {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Get the correct option name for a given field
+	 *
+	 * @param string $field Field name
+	 * @return string Option name (core or provider settings)
+	 * @since 1.1.0
+	 */
+	private function get_option_name_for_field( string $field ): string {
+		$core_fields = array( 'enable_vpn_blocking', 'warning_title', 'warning_message' );
+		
+		if ( in_array( $field, $core_fields, true ) ) {
+			return 'accessdefender_core_settings';
+		}
+		
+		return 'accessdefender_provider_settings';
 	}
 }

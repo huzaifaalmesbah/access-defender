@@ -42,13 +42,12 @@ class ApiProviderManager {
 	 * Constructor
 	 */
 	public function __construct() {
-		// Load new options structure with backward compatibility
+		// Load new options structure only
 		$core_settings     = get_option( 'accessdefender_core_settings', array() );
 		$provider_settings = get_option( 'accessdefender_provider_settings', array() );
-		$legacy_options    = get_option( 'accessdefender_options', array() );
 		
-		// Merge all options with priority: provider_settings > core_settings > legacy_options
-		$this->options = array_merge( $legacy_options, $core_settings, $provider_settings );
+		// Merge new structured options
+		$this->options = array_merge( $core_settings, $provider_settings );
 		
 		$this->init_providers();
 	}
@@ -305,7 +304,7 @@ class ApiProviderManager {
 			$result = $provider->get_ip_info( $ip, $api_key );
 
 			if ( $result !== false ) {
-				// Add debug info about which provider was used
+				// Track which provider was used
 				$result['_provider_used'] = $slug;
 				$result['_provider_name'] = $provider->get_name();
 				return $result;
@@ -328,10 +327,12 @@ class ApiProviderManager {
 			return false;
 		}
 
-		$provider_slug = $ip_info['provider'] ?? 'ip-api';
+		$provider_slug = $ip_info['_provider_used'] ?? $ip_info['provider'] ?? 'ip-api';
 		$provider      = $this->providers[ $provider_slug ] ?? $this->providers['ip-api'];
 
-		return $provider->is_vpn_proxy( $ip_info );
+		$result = $provider->is_vpn_proxy( $ip_info );
+
+		return $result;
 	}
 
 	/**
@@ -350,7 +351,7 @@ class ApiProviderManager {
 			);
 		}
 
-		$provider_slug = $ip_info['provider'] ?? 'ip-api';
+		$provider_slug = $ip_info['_provider_used'] ?? $ip_info['provider'] ?? 'ip-api';
 		$provider      = $this->providers[ $provider_slug ] ?? $this->providers['ip-api'];
 
 		return $provider->get_country_info( $ip_info );
@@ -421,7 +422,7 @@ class ApiProviderManager {
 					'response_time' => $response_time,
 					'error'         => $result === false ? 'Failed to get IP info' : null,
 				);
-			} catch ( Exception $e ) {
+			} catch ( \Exception $e ) {
 				$results[ $slug ] = array(
 					'success'       => false,
 					'response_time' => 0,

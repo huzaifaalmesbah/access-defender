@@ -231,6 +231,7 @@ abstract class BaseProvider implements ApiProviderInterface {
 			'slug'          => $this->get_slug(),
 			'is_free'       => $this->is_free(),
 			'rate_limit'    => $this->get_rate_limit(),
+			'minute_limit'  => method_exists( $this, 'get_minute_rate_limit' ) ? $this->get_minute_rate_limit() : 0,
 			'monthly_usage' => $stats['monthly_usage'],
 			'total_success' => $stats['total_success'],
 			'total_failed'  => $stats['total_failed'],

@@ -53,10 +53,7 @@ class ActivationHooks {
 				'enable_vpn_blocking' => '1',
 				'warning_title'       => esc_html__( 'Access Denied', 'access-defender' ),
 				'warning_message'     => wp_kses_post(
-					esc_html__(
-						'We\'ve detected that you\'re using a VPN or proxy. For security reasons, access to this website is not allowed through VPNs or proxies. Please disable your VPN or proxy and try again.',
-						'access-defender'
-					)
+					__( 'We\'ve detected that you\'re using a VPN or proxy. For security reasons, access to this website is not allowed through VPNs or proxies. Please disable your VPN or proxy and try again.', 'access-defender' )
 				),
 				'version'             => ACCESS_DEFENDER_VERSION,
 				'installed_date'      => current_time( 'mysql' ),
@@ -89,57 +86,40 @@ class ActivationHooks {
 	/**
 	 * Migrate from legacy options structure
 	 *
+	 * Legacy version only had 3 core settings:
+	 * - enable_vpn_blocking
+	 * - warning_title  
+	 * - warning_message
+	 *
+	 * All provider settings are new in v1.1.0, so we only migrate these 3 fields.
+	 *
 	 * @return void
 	 */
 	private static function migrate_legacy_options(): void {
 		$legacy_options = get_option( 'accessdefender_options' );
 		
+		// Only migrate if legacy options exist and contain the expected core fields
 		if ( $legacy_options && is_array( $legacy_options ) ) {
-			// Migrate core settings
 			$core_settings = get_option( 'accessdefender_core_settings', array() );
+			
+			// Migrate only the 3 core fields that existed in legacy version
 			if ( isset( $legacy_options['enable_vpn_blocking'] ) ) {
 				$core_settings['enable_vpn_blocking'] = $legacy_options['enable_vpn_blocking'];
 			}
 			if ( isset( $legacy_options['warning_title'] ) ) {
-				$core_settings['warning_title'] = $legacy_options['warning_title'];
+				$core_settings['warning_title'] = wp_kses_post( $legacy_options['warning_title'] );
 			}
 			if ( isset( $legacy_options['warning_message'] ) ) {
-				$core_settings['warning_message'] = $legacy_options['warning_message'];
+				// Handle HTML entities from legacy data
+				$message = wp_kses_post( html_entity_decode( $legacy_options['warning_message'] ) );
+				$core_settings['warning_message'] = $message;
 			}
+			
+			// Update core settings with migrated data
 			update_option( 'accessdefender_core_settings', $core_settings );
 
-			// Migrate provider settings
-			$provider_settings = get_option( 'accessdefender_provider_settings', array() );
-			if ( isset( $legacy_options['provider_mode'] ) ) {
-				$provider_settings['provider_mode'] = $legacy_options['provider_mode'];
-			}
-			if ( isset( $legacy_options['free_providers'] ) ) {
-				$provider_settings['free_providers'] = $legacy_options['free_providers'];
-			}
-			if ( isset( $legacy_options['paid_provider'] ) ) {
-				$provider_settings['paid_provider'] = $legacy_options['paid_provider'];
-			}
-			if ( isset( $legacy_options['primary_provider'] ) ) {
-				$provider_settings['primary_provider'] = $legacy_options['primary_provider'];
-			}
-			if ( isset( $legacy_options['active_providers'] ) ) {
-				$provider_settings['active_providers'] = $legacy_options['active_providers'];
-			}
-			if ( isset( $legacy_options['api_keys'] ) ) {
-				$provider_settings['api_keys'] = $legacy_options['api_keys'];
-			}
-			update_option( 'accessdefender_provider_settings', $provider_settings );
-
-			// If both new buckets have content, remove legacy option to complete migration
-			$core_done     = get_option( 'accessdefender_core_settings', array() );
-			$provider_done = get_option( 'accessdefender_provider_settings', array() );
-			if ( is_array( $core_done ) && ! empty( $core_done ) && is_array( $provider_done ) && ! empty( $provider_done ) ) {
-				delete_option( 'accessdefender_options' );
-			} else {
-				// Otherwise keep legacy and mark as partially migrated
-				$legacy_options['_migrated_to_v1_1'] = true;
-				update_option( 'accessdefender_options', $legacy_options );
-			}
+			// Migration complete - remove legacy option
+			delete_option( 'accessdefender_options' );
 		}
 	}
 

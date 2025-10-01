@@ -16,9 +16,6 @@ namespace AccessDefender\Services;
  * Class VpnDetector
  *
  * @package AccessDefender\Services
- *
- * @property IpDetector $ip_detector IP detector service
- * @property ApiProviderManager $api_manager API provider manager
  */
 class VpnDetector {
 
@@ -58,7 +55,9 @@ class VpnDetector {
 			return false;
 		}
 
-		return $this->api_manager->is_vpn_proxy( $ip );
+		$result = $this->api_manager->is_vpn_proxy( $ip );
+		
+		return $result;
 	}
 
 	/**

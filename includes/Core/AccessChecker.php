@@ -13,6 +13,7 @@ namespace AccessDefender\Core;
 
 use AccessDefender\Services\BotDetector;
 use AccessDefender\Services\VpnDetector;
+use AccessDefender\Core\OptionsManager;
 
 /**
  * Class AccessChecker
@@ -52,27 +53,32 @@ class AccessChecker {
 	 * @return void
 	 */
 	public function check_access(): void {
-		// Allow admin users to bypass the check.
-		if ( ! is_admin() && current_user_can( 'manage_options' ) ) {
+		// Allow admin users and admin area to bypass the check.
+		if ( is_admin() || current_user_can( 'manage_options' ) ) {
 			return;
 		}
 
-		// Get options from database.
-		$options = get_option( 'accessdefender_options', array() );
+		// Get options from OptionsManager (supports new structure with backward compatibility)
+		$enable_vpn_blocking = OptionsManager::get_option( 'enable_vpn_blocking', '' );
+		$warning_title = OptionsManager::get_option( 'warning_title', '' );
+		$warning_message = OptionsManager::get_option( 'warning_message', '' );
 
 		// Check if VPN blocking is enabled and the request is from a VPN/proxy.
-		if ( ! empty( $options['enable_vpn_blocking'] ) &&
-			! $this->bot_detector->is_search_bot() &&
-			$this->vpn_detector->is_vpn_or_proxy()
+		$is_bot = $this->bot_detector->is_search_bot();
+		$is_vpn = $this->vpn_detector->is_vpn_or_proxy();
+		
+		if ( ! empty( $enable_vpn_blocking ) &&
+			! $is_bot &&
+			$is_vpn
 		) {
 			// Get title from options or use default.
-			$title = ! empty( $options['warning_title'] )
-				? $options['warning_title']
+			$title = ! empty( $warning_title )
+				? $warning_title
 				: esc_html__( 'Access Denied', 'access-defender' );
 
 			// Get message from options or use default.
-			$message = ! empty( $options['warning_message'] )
-				? $options['warning_message']
+			$message = ! empty( $warning_message )
+				? stripslashes( $warning_message )
 				: esc_html__( 'We\'ve detected that you\'re using a VPN or proxy. For security reasons, access to this website is not allowed through VPNs or proxies. Please disable your VPN or proxy and try again.', 'access-defender' );
 
 			// Format the complete message with HTML structure.

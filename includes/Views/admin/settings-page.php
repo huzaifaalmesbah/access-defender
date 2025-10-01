@@ -16,12 +16,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<div class="access-defender-main">
 			<div class="access-defender-card">
 				<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
-				<form method="post" action="options.php">
-					<?php
-					settings_fields( 'accessdefender_options' );
-					do_settings_sections( 'access-defender' );
-					submit_button( 'Save Changes', 'primary access-defender-submit', 'submit', true );
-					?>
+				
+				<?php settings_errors(); ?>
+				
+				<!-- Combined Settings Form -->
+				<form method="post" action="">
+					<?php wp_nonce_field( 'accessdefender_save_settings', 'accessdefender_nonce' ); ?>
+					<input type="hidden" name="action" value="accessdefender_save_settings" />
+					
+					<?php do_settings_sections( 'access-defender' ); ?>
+					
+					<h3>Provider Settings</h3>
+					<?php do_settings_sections( 'access-defender-providers' ); ?>
+					
+					<?php submit_button( 'Save Settings', 'primary access-defender-submit', 'submit', true ); ?>
 				</form>
 			</div>
 		</div>

@@ -89,6 +89,7 @@ class Plugin implements PluginInterface {
 	 * @return void
 	 */
 	private function init_hooks(): void {
+		// Hook on 'wp' to ensure WordPress is fully loaded and user is authenticated
 		add_action( 'wp', array( $this, 'check_access' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		

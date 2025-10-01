@@ -206,14 +206,13 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success && response.data) {
-                    console.log('Provider status data:', response.data); // Debug log
                     updateProviderStatus(response.data);
                 } else {
-                    console.log('Invalid provider status response:', response);
+                    // Handle invalid response silently or show user-friendly message
                 }
             },
             error: function(xhr, status, error) {
-                console.log('Failed to load provider status:', error);
+                // Handle error silently or show user-friendly message
             }
         });
     }
