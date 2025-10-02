@@ -16,6 +16,11 @@ Access Defender is the most comprehensive WordPress security plugin for blocking
 
 NEW in Version 1.1.0: Revolutionary multi-provider system with automatic failover, real-time monitoring, and enhanced reliability!
 
+= 📺 Quick Start Video Tutorial =
+
+Watch our step-by-step installation and configuration guide:
+https://www.youtube.com/watch?v=gWUFEuK1ZhA
+
 = Key Features =
 
 = Advanced VPN & Proxy Detection =
@@ -204,7 +209,7 @@ We provide comprehensive support:
 * Fixed: VPN blocking setting not saving when disabled
 
 = 1.1.0 =
-* Added: Multiple API provider support (6 free + 4 premium providers)
+* Added: Multiple API provider support (1 free + 2 premium providers)
 * Added: Smart auto-rotation system for free providers
 * Added: Real-time usage dashboard and statistics
 * Added: Enhanced provider management system
