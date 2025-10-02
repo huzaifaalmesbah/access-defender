@@ -169,6 +169,36 @@ class AdminPage {
 		// For checkboxes, we need to always set the value (1 if checked, 0 if not)
 		$core_input['enable_vpn_blocking'] = isset( $_POST['enable_vpn_blocking'] ) ? sanitize_text_field( wp_unslash( $_POST['enable_vpn_blocking'] ) ) : '0';
 		
+		// Handle VPN blocking mode
+		if ( isset( $_POST['vpn_blocking_mode'] ) ) {
+			$core_input['vpn_blocking_mode'] = sanitize_text_field( wp_unslash( $_POST['vpn_blocking_mode'] ) );
+		}
+		
+		// Handle page/post selections
+		if ( isset( $_POST['excluded_pages'] ) && is_array( $_POST['excluded_pages'] ) ) {
+			$core_input['excluded_pages'] = array_map( 'intval', wp_unslash( $_POST['excluded_pages'] ) );
+		} else {
+			$core_input['excluded_pages'] = array();
+		}
+		
+		if ( isset( $_POST['excluded_posts'] ) && is_array( $_POST['excluded_posts'] ) ) {
+			$core_input['excluded_posts'] = array_map( 'intval', wp_unslash( $_POST['excluded_posts'] ) );
+		} else {
+			$core_input['excluded_posts'] = array();
+		}
+		
+		if ( isset( $_POST['selected_pages'] ) && is_array( $_POST['selected_pages'] ) ) {
+			$core_input['selected_pages'] = array_map( 'intval', wp_unslash( $_POST['selected_pages'] ) );
+		} else {
+			$core_input['selected_pages'] = array();
+		}
+		
+		if ( isset( $_POST['selected_posts'] ) && is_array( $_POST['selected_posts'] ) ) {
+			$core_input['selected_posts'] = array_map( 'intval', wp_unslash( $_POST['selected_posts'] ) );
+		} else {
+			$core_input['selected_posts'] = array();
+		}
+		
 		if ( isset( $_POST['warning_title'] ) ) {
 			$core_input['warning_title'] = sanitize_text_field( wp_unslash( $_POST['warning_title'] ) );
 		}
@@ -369,6 +399,7 @@ class AdminPage {
 	 *
 	 * @since 1.0.1
 	 * @updated 1.1.0 - Added API provider settings
+	 * @updated 1.2.0 - Added VPN blocking mode settings
 	 */
 	private function add_settings_fields(): void {
 		// Core settings fields
@@ -379,6 +410,51 @@ class AdminPage {
 			'access-defender',
 			'main_section',
 			array( 'enable_vpn_blocking' )
+		);
+
+		add_settings_field(
+			'vpn_blocking_mode',
+			'VPN Blocking Mode',
+			array( $this, 'render_vpn_blocking_mode_field' ),
+			'access-defender',
+			'main_section',
+			array( 'vpn_blocking_mode' )
+		);
+
+		add_settings_field(
+			'excluded_pages',
+			'Excluded Pages (Full Site Mode)',
+			array( $this, 'render_page_selector_field' ),
+			'access-defender',
+			'main_section',
+			array( 'excluded_pages', 'page' )
+		);
+
+		add_settings_field(
+			'excluded_posts',
+			'Excluded Posts (Full Site Mode)',
+			array( $this, 'render_page_selector_field' ),
+			'access-defender',
+			'main_section',
+			array( 'excluded_posts', 'post' )
+		);
+
+		add_settings_field(
+			'selected_pages',
+			'Selected Pages (Selective Mode)',
+			array( $this, 'render_page_selector_field' ),
+			'access-defender',
+			'main_section',
+			array( 'selected_pages', 'page' )
+		);
+
+		add_settings_field(
+			'selected_posts',
+			'Selected Posts (Selective Mode)',
+			array( $this, 'render_page_selector_field' ),
+			'access-defender',
+			'main_section',
+			array( 'selected_posts', 'post' )
 		);
 
 		add_settings_field(
@@ -798,6 +874,38 @@ class AdminPage {
 		// Handle checkbox fields - check the actual value, not just presence
 		$sanitized['enable_vpn_blocking'] = ( isset( $input['enable_vpn_blocking'] ) && '1' === $input['enable_vpn_blocking'] ) ? '1' : '0';
 
+		// Handle VPN blocking mode
+		if ( isset( $input['vpn_blocking_mode'] ) ) {
+			$sanitized['vpn_blocking_mode'] = in_array( $input['vpn_blocking_mode'], array( 'full_site', 'selective' ), true ) 
+				? $input['vpn_blocking_mode'] 
+				: 'full_site';
+		}
+
+		// Handle page/post selections
+		if ( isset( $input['excluded_pages'] ) && is_array( $input['excluded_pages'] ) ) {
+			$sanitized['excluded_pages'] = array_map( 'intval', $input['excluded_pages'] );
+		} else {
+			$sanitized['excluded_pages'] = array();
+		}
+
+		if ( isset( $input['excluded_posts'] ) && is_array( $input['excluded_posts'] ) ) {
+			$sanitized['excluded_posts'] = array_map( 'intval', $input['excluded_posts'] );
+		} else {
+			$sanitized['excluded_posts'] = array();
+		}
+
+		if ( isset( $input['selected_pages'] ) && is_array( $input['selected_pages'] ) ) {
+			$sanitized['selected_pages'] = array_map( 'intval', $input['selected_pages'] );
+		} else {
+			$sanitized['selected_pages'] = array();
+		}
+
+		if ( isset( $input['selected_posts'] ) && is_array( $input['selected_posts'] ) ) {
+			$sanitized['selected_posts'] = array_map( 'intval', $input['selected_posts'] );
+		} else {
+			$sanitized['selected_posts'] = array();
+		}
+
 		if ( isset( $input['warning_title'] ) ) {
 			$sanitized['warning_title'] = sanitize_text_field( $input['warning_title'] );
 		}
@@ -866,6 +974,222 @@ class AdminPage {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Render VPN blocking mode field
+	 *
+	 * @param array $args Field arguments.
+	 * @return void
+	 * @since 1.2.0
+	 */
+	public function render_vpn_blocking_mode_field( $args ): void {
+		$field = $args[0];
+		$value = isset( $this->options[ $field ] ) ? $this->options[ $field ] : 'full_site';
+		?>
+		<div class="vpn-blocking-mode-container">
+			<label>
+				<input type="radio" name="<?php echo esc_attr( $field ); ?>" value="full_site" <?php checked( $value, 'full_site' ); ?> />
+				<strong>Full Site Protection</strong> - Block VPN users on entire site with exclusions
+			</label>
+			<br><br>
+			<label>
+				<input type="radio" name="<?php echo esc_attr( $field ); ?>" value="selective" <?php checked( $value, 'selective' ); ?> />
+				<strong>Selective Protection</strong> - Block VPN users only on selected pages/posts
+			</label>
+			<p class="description">
+				Choose how VPN blocking should be applied to your website.
+			</p>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Render page/post selector field
+	 *
+	 * @param array $args Field arguments.
+	 * @return void
+	 * @since 1.2.0
+	 */
+	public function render_page_selector_field( $args ): void {
+		$field = $args[0];
+		$post_type = $args[1];
+		$selected = isset( $this->options[ $field ] ) ? $this->options[ $field ] : array();
+		
+		// Ensure selected is an array
+		if ( ! is_array( $selected ) ) {
+			$selected = array();
+		}
+
+		// Get all pages or posts for AJAX search
+		$posts = get_posts( array(
+			'post_type' => $post_type,
+			'post_status' => 'publish',
+			'numberposts' => -1,
+			'orderby' => 'title',
+			'order' => 'ASC'
+		) );
+
+		$row_class = str_replace( '_', '-', $field ) . '-row';
+		$field_id = 'field_' . $field;
+		$search_id = 'search_' . $field;
+		$results_id = 'results_' . $field;
+		$selected_display_id = 'selected_' . $field;
+		?>
+		<div class="<?php echo esc_attr( $row_class ); ?>">
+			<!-- Search Input -->
+			<div class="search-container">
+				<input type="text" 
+					   id="<?php echo esc_attr( $search_id ); ?>" 
+					   placeholder="🔍 Search <?php echo esc_html( $post_type === 'page' ? 'pages' : 'posts' ); ?>..." />
+			</div>
+
+			<!-- Search Results Container -->
+			<div id="<?php echo esc_attr( $results_id ); ?>" class="search-results" style="display: none;">
+				<!-- Results will be populated here -->
+			</div>
+
+			<!-- Selected Items Display -->
+			<div id="<?php echo esc_attr( $selected_display_id ); ?>" class="selected-items">
+				<?php if ( ! empty( $selected ) ) : ?>
+					<div class="selected-items-header">
+						Selected <?php echo esc_html( $post_type === 'page' ? 'Pages' : 'Posts' ); ?>:
+					</div>
+					<div class="selected-items-list">
+						<?php foreach ( $selected as $post_id ) : 
+							$post = get_post( $post_id );
+							if ( $post ) : ?>
+								<div class="selected-item" data-id="<?php echo esc_attr( $post_id ); ?>">
+									<?php echo esc_html( $post->post_title ); ?>
+									<span class="remove-item">&times;</span>
+									<input type="hidden" name="<?php echo esc_attr( $field ); ?>[]" value="<?php echo esc_attr( $post_id ); ?>" />
+								</div>
+							<?php endif;
+						endforeach; ?>
+					</div>
+				<?php endif; ?>
+			</div>
+
+			<p class="description">
+				<?php if ( strpos( $field, 'excluded' ) !== false ) : ?>
+					🔓 These <?php echo esc_html( $post_type === 'page' ? 'pages' : 'posts' ); ?> will be accessible to VPN users.
+				<?php else : ?>
+					🚫 VPN users will be blocked only on these <?php echo esc_html( $post_type === 'page' ? 'pages' : 'posts' ); ?>.
+				<?php endif; ?>
+			</p>
+		</div>
+
+		<script>
+		jQuery(document).ready(function($) {
+			var posts = <?php echo wp_json_encode( array_map( function( $post ) {
+				return array( 'id' => $post->ID, 'title' => $post->post_title );
+			}, $posts ) ); ?>;
+			
+			var searchInput = $('#<?php echo esc_js( $search_id ); ?>');
+			var resultsContainer = $('#<?php echo esc_js( $results_id ); ?>');
+			var selectedContainer = $('#<?php echo esc_js( $selected_display_id ); ?>');
+			var fieldName = '<?php echo esc_js( $field ); ?>';
+			var postType = '<?php echo esc_js( $post_type ); ?>';
+
+			// Search functionality
+			searchInput.on('input', function() {
+				var searchText = $(this).val().toLowerCase().trim();
+				
+				if (searchText.length < 2) {
+					resultsContainer.hide();
+					return;
+				}
+
+				var filteredPosts = posts.filter(function(post) {
+					return post.title.toLowerCase().indexOf(searchText) !== -1;
+				});
+
+				if (filteredPosts.length === 0) {
+					resultsContainer.html('<div style="padding: 10px; text-align: center; color: #666;">No ' + postType + 's found</div>').show();
+					return;
+				}
+
+				var html = '';
+				filteredPosts.slice(0, 10).forEach(function(post) { // Limit to 10 results
+					var isSelected = selectedContainer.find('[data-id="' + post.id + '"]').length > 0;
+					var itemClass = isSelected ? 'search-result-item selected' : 'search-result-item';
+					var checkmark = isSelected ? ' ✓' : '';
+					
+					html += '<div class="' + itemClass + '" data-id="' + post.id + '">' +
+							'<span>' + post.title + checkmark + '</span>' +
+							'</div>';
+				});
+
+				resultsContainer.html(html).show();
+			});
+
+			// Handle result item clicks
+			resultsContainer.on('click', '.search-result-item', function() {
+				var postId = $(this).data('id');
+				var postTitle = $(this).text().replace(' ✓', '');
+				
+				// Check if already selected
+				if (selectedContainer.find('[data-id="' + postId + '"]').length > 0) {
+					return;
+				}
+
+				// Add to selected items
+				addSelectedItem(postId, postTitle);
+				
+				// Update search results
+				$(this).addClass('selected');
+				$(this).find('span').append(' ✓');
+				
+				// Clear search
+				searchInput.val('');
+				resultsContainer.hide();
+			});
+
+			// Handle remove item clicks
+			selectedContainer.on('click', '.remove-item', function() {
+				var item = $(this).closest('.selected-item');
+				var postId = item.data('id');
+				item.remove();
+				
+				// Update header visibility
+				updateSelectedHeader();
+			});
+
+			function addSelectedItem(postId, postTitle) {
+				// Ensure header exists
+				if (selectedContainer.find('.selected-items-header').length === 0) {
+					selectedContainer.prepend('<div class="selected-items-header" style="font-weight: bold; margin-bottom: 8px; color: #23282d;">Selected ' + (postType === 'page' ? 'Pages' : 'Posts') + ':</div>');
+				}
+				
+				// Ensure list container exists
+				if (selectedContainer.find('.selected-items-list').length === 0) {
+					selectedContainer.append('<div class="selected-items-list"></div>');
+				}
+
+				var itemHtml = '<div class="selected-item" data-id="' + postId + '">' +
+							   postTitle +
+							   '<span class="remove-item">&times;</span>' +
+							   '<input type="hidden" name="' + fieldName + '[]" value="' + postId + '" />' +
+							   '</div>';
+				
+				selectedContainer.find('.selected-items-list').append(itemHtml);
+				updateSelectedHeader();
+			}
+
+			function updateSelectedHeader() {
+				var hasItems = selectedContainer.find('.selected-item').length > 0;
+				selectedContainer.find('.selected-items-header').toggle(hasItems);
+			}
+
+			// Hide results when clicking outside
+			$(document).on('click', function(e) {
+				if (!$(e.target).closest('#<?php echo esc_js( $search_id ); ?>, #<?php echo esc_js( $results_id ); ?>').length) {
+					resultsContainer.hide();
+				}
+			});
+		});
+		</script>
+		<?php
 	}
 
 }

@@ -60,6 +60,11 @@ class AccessChecker {
 
 		// Get options from OptionsManager (supports new structure with backward compatibility)
 		$enable_vpn_blocking = OptionsManager::get_option( 'enable_vpn_blocking', '' );
+		$vpn_blocking_mode = OptionsManager::get_option( 'vpn_blocking_mode', 'full_site' );
+		$excluded_pages = OptionsManager::get_option( 'excluded_pages', array() );
+		$excluded_posts = OptionsManager::get_option( 'excluded_posts', array() );
+		$selected_pages = OptionsManager::get_option( 'selected_pages', array() );
+		$selected_posts = OptionsManager::get_option( 'selected_posts', array() );
 		$warning_title = OptionsManager::get_option( 'warning_title', '' );
 		$warning_message = OptionsManager::get_option( 'warning_message', '' );
 
@@ -67,10 +72,15 @@ class AccessChecker {
 		$is_bot = $this->bot_detector->is_search_bot();
 		$is_vpn = $this->vpn_detector->is_vpn_or_proxy();
 		
-		if ( ! empty( $enable_vpn_blocking ) &&
-			! $is_bot &&
-			$is_vpn
-		) {
+		// Skip if VPN blocking is disabled, user is a bot, or not using VPN
+		if ( empty( $enable_vpn_blocking ) || $is_bot || ! $is_vpn ) {
+			return;
+		}
+
+		// Check if VPN blocking should be applied based on the mode and current page
+		$should_block = $this->should_block_current_page( $vpn_blocking_mode, $excluded_pages, $excluded_posts, $selected_pages, $selected_posts );
+
+		if ( $should_block ) {
 			// Get title from options or use default.
 			$title = ! empty( $warning_title )
 				? $warning_title
@@ -93,6 +103,46 @@ class AccessChecker {
 				esc_html( $title ),
 				array( 'response' => 403 )
 			);
+		}
+	}
+
+	/**
+	 * Determine if VPN blocking should be applied to the current page.
+	 *
+	 * @param string $mode The VPN blocking mode ('full_site' or 'selective').
+	 * @param array  $excluded_pages Array of excluded page IDs for full site mode.
+	 * @param array  $excluded_posts Array of excluded post IDs for full site mode.
+	 * @param array  $selected_pages Array of selected page IDs for selective mode.
+	 * @param array  $selected_posts Array of selected post IDs for selective mode.
+	 * @return bool True if VPN should be blocked, false otherwise.
+	 */
+	private function should_block_current_page( $mode, $excluded_pages, $excluded_posts, $selected_pages, $selected_posts ): bool {
+		$current_page_id = get_queried_object_id();
+		$current_post_type = get_post_type( $current_page_id );
+
+		// Handle different blocking modes
+		switch ( $mode ) {
+			case 'selective':
+				// Selective mode: only block on selected pages/posts
+				if ( is_page() && in_array( $current_page_id, $selected_pages, true ) ) {
+					return true;
+				}
+				if ( is_single() && in_array( $current_page_id, $selected_posts, true ) ) {
+					return true;
+				}
+				return false;
+
+			case 'full_site':
+			default:
+				// Full site mode: block everywhere except excluded pages/posts
+				if ( is_page() && in_array( $current_page_id, $excluded_pages, true ) ) {
+					return false;
+				}
+				if ( is_single() && in_array( $current_page_id, $excluded_posts, true ) ) {
+					return false;
+				}
+				// Block on home page, archives, and all other pages/posts not excluded
+				return true;
 		}
 	}
 }

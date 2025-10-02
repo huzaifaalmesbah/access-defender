@@ -51,6 +51,11 @@ class ActivationHooks {
 		if ( ! get_option( 'accessdefender_core_settings' ) ) {
 			$core_settings = array(
 				'enable_vpn_blocking' => '1',
+				'vpn_blocking_mode'   => 'full_site',
+				'excluded_pages'      => array(),
+				'excluded_posts'      => array(),
+				'selected_pages'      => array(),
+				'selected_posts'      => array(),
 				'warning_title'       => esc_html__( 'Access Denied', 'access-defender' ),
 				'warning_message'     => wp_kses_post(
 					__( 'We\'ve detected that you\'re using a VPN or proxy. For security reasons, access to this website is not allowed through VPNs or proxies. Please disable your VPN or proxy and try again.', 'access-defender' )

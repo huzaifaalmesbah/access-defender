@@ -17,6 +17,110 @@
     flex-direction: column;
 }
 
+/* Search Interface Styles */
+.search-container {
+    margin-bottom: 15px;
+}
+
+.search-container input[type="text"] {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: #fff;
+}
+
+.search-container input[type="text"]:focus {
+    border-color: #0073aa;
+    box-shadow: 0 0 0 2px rgba(0, 115, 170, 0.1);
+    outline: none;
+}
+
+.search-results {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.search-result-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background-color: #f8f9fa;
+}
+
+.search-result-item.selected {
+    background-color: #e7f3ff !important;
+    color: #0073aa;
+    font-weight: 500;
+}
+
+.selected-items {
+    margin-top: 15px;
+}
+
+.selected-items-header {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #23282d;
+    font-size: 14px;
+}
+
+.selected-items-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.selected-item {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #0073aa, #005a87);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 115, 170, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selected-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 115, 170, 0.3);
+}
+
+.selected-item .remove-item {
+    margin-left: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1;
+    opacity: 0.8;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.selected-item .remove-item:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
 /* Tab Navigation */
 .access-defender-container .access-defender-tabs {
     margin-bottom: 20px;

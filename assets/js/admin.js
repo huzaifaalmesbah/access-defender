@@ -272,6 +272,43 @@ jQuery(document).ready(function($) {
         initializeApiKeyFields();
     }
     
+    // VPN Blocking Mode Toggle - v1.2.0 Enhanced Animations
+    function initializeVpnBlockingMode() {
+        function toggleVpnModeFields() {
+            var mode = $('input[name="vpn_blocking_mode"]:checked').val();
+            
+            if (mode === 'full_site') {
+                // Hide selective fields with fade and slide up
+                $('.selected-pages-row, .selected-posts-row').closest('tr').stop(true, true).fadeOut(200, function() {
+                    $(this).slideUp(300);
+                });
+                
+                // Show exclusion fields with slide down and fade in
+                $('.excluded-pages-row, .excluded-posts-row').closest('tr').stop(true, true).slideDown(300, function() {
+                    $(this).fadeIn(200);
+                });
+                
+            } else if (mode === 'selective') {
+                // Hide exclusion fields with fade and slide up
+                $('.excluded-pages-row, .excluded-posts-row').closest('tr').stop(true, true).fadeOut(200, function() {
+                    $(this).slideUp(300);
+                });
+                
+                // Show selective fields with slide down and fade in
+                $('.selected-pages-row, .selected-posts-row').closest('tr').stop(true, true).slideDown(300, function() {
+                    $(this).fadeIn(200);
+                });
+            }
+        }
+        
+        // Bind change event
+        $('input[name="vpn_blocking_mode"]').on('change', toggleVpnModeFields);
+        
+        // Initialize on page load
+        toggleVpnModeFields();
+    }
+    
     // Call initialization
     initializeInterface();
+    initializeVpnBlockingMode();
 });
