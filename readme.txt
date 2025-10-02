@@ -16,9 +16,9 @@ Access Defender is the most comprehensive WordPress security plugin for blocking
 
 NEW in Version 1.1.0: Revolutionary multi-provider system with automatic failover, real-time monitoring, and enhanced reliability!
 
-= 📺 Quick Start Video Tutorial =
-
+= Quick Start Video Tutorial =
 Watch our step-by-step installation and configuration guide:
+
 https://www.youtube.com/watch?v=gWUFEuK1ZhA
 
 = Key Features =
